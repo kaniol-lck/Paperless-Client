@@ -16,7 +16,6 @@ SOURCES += \
     pageswitcher.cpp \
     paperless/paperless.cpp \
     paperless/paperlessapi.cpp \
-    savedviewmodel.cpp \
     viewwidget.cpp \
     windowselectorwidget.cpp
 
@@ -36,7 +35,6 @@ HEADERS += \
     paperless/paperless.h \
     paperless/paperlessapi.h \
     reply.hpp \
-    savedviewmodel.h \
     util.hpp \
     viewwidget.h \
     windowselectorwidget.h

@@ -12,10 +12,10 @@ int DocumentModel::rowCount(const QModelIndex &parent) const
     return list_.results.count();
 }
 
-QList<int> customFieldList(ReturnList<Document> list)
+QList<int> DocumentModel::customFieldList() const
 {
     QList<int> fieldList;
-    for(auto &&doc : list.results)
+    for(auto &&doc : list_.results)
         for(auto &&field : doc.custom_fields)
             if(!fieldList.contains(field.field))
                 fieldList << field.field;
@@ -25,7 +25,7 @@ QList<int> customFieldList(ReturnList<Document> list)
 int DocumentModel::columnCount(const QModelIndex &parent) const
 {
     if(!inited_) return 0;
-    return ColumnSize - 1 + customFieldList(list_).count();
+    return ColumnSize - 1 + customFieldList().count();
 }
 
 QVariant DocumentModel::data(const QModelIndex &index, int role) const
@@ -84,7 +84,7 @@ QVariant DocumentModel::data(const QModelIndex &index, int role) const
         default:
             // case CustomFieldsColumn:
             auto i = index.column() - CustomFieldsColumn;
-            auto l = customFieldList(list_);
+            auto l = customFieldList();
             if(i >= 0 && i < l.size()){
                 auto id = l.at(i);
                 for(auto &&field : document.custom_fields)
@@ -100,6 +100,41 @@ void DocumentModel::setList(const ReturnList<Document> &newList)
 {
     list_ = newList;
     inited_ = true;
+}
+
+QList<int> DocumentModel::sectionList(const SavedView &view)
+{
+    //TODO: not same with others
+    QList<QString> fieldList = {
+        "id", /// no such field
+        "correspondent",
+        "documenttype",
+        "storagepath",
+        "title",
+        "content", /// no such field
+        "tag",
+        "created",
+        "createddate", /// no such field
+        "modified", /// no such field
+        "added",
+        "deletedAt", /// no such field
+        "asn",
+        "originalFileName", /// no such field
+        "archivedFileName", /// no such field
+        "owner",
+        "userCanChange", /// no such field
+        "shared",
+        "note"
+    };
+    for(auto i : customFieldList())
+        fieldList << QString("custom_field_%1").arg(i);
+    QList<int> list;
+    for(auto &&field : view.display_fields){
+        if(auto i = fieldList.indexOf(field); i != -1){
+            list << i;
+        }
+    }
+    return list;
 }
 
 
@@ -154,7 +189,7 @@ QVariant DocumentModel::headerData(int section, Qt::Orientation orientation, int
         default:
             // case CustomFieldsColumn:
             auto i = section - CustomFieldsColumn;
-            auto l = customFieldList(list_);
+            auto l = customFieldList();
             if(i >= 0 && i < l.size()){
                 auto id = l.at(i);
                 return client_->getCustomFieldName(id);

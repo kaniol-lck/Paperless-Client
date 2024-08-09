@@ -55,3 +55,26 @@ Reply<bool> PaperlessApi::login(const QString &username, const QString &password
             }
     };
 }
+
+Reply<ReturnList<Document> > PaperlessApi::getDocumentList(const SavedView &view)
+{
+    QUrlQuery query;
+    for(auto &&rule : view.filter_rules){
+        // TODO: filter
+        if(rule.rule_type == 30){
+            query.addQueryItem("storage_path__id", rule.value);
+        } else if(rule.rule_type == 28){
+            query.addQueryItem("document_type__id", rule.value);
+        }
+    }
+    auto request = api_.createRequest(documents, query);
+    return { manager_.get(request), [](auto reply){
+                QRestReply restReply(reply);
+                if (const auto json = restReply.readJson(); json && json->isObject()) {
+                    auto result = json->toVariant();
+                    auto list = ReturnList<Document>::fromVariant(result);
+                    return list;
+                }
+                return ReturnList<Document>{};
+            }};
+}

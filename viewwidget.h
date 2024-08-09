@@ -4,9 +4,8 @@
 #include "paperless/SavedView.h"
 #include <QMainWindow>
 
-
-
 class Paperless;
+
 namespace Ui {
 class ViewWidget;
 }
@@ -22,12 +21,15 @@ public:
     void getDocs();
 
     SavedView view() const;
+public slots:
+    void updateSections();
 
 private:
     Ui::ViewWidget *ui;
     Paperless *client_;
     SavedView view_;
     DocumentModel *model_;
+
 };
 
 #endif // VIEWWIDGET_H

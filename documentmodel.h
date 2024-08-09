@@ -3,6 +3,7 @@
 
 #include "paperless/Document.h"
 #include "paperless/ReturnList.hpp"
+#include "paperless/SavedView.h"
 #include <QAbstractTableModel>
 
 class Paperless;
@@ -44,11 +45,14 @@ public:
 
     void setList(const ReturnList<Document> &newList);
 
+    QList<int> sectionList(const SavedView &view);
+
 private:
     ReturnList<Document> list_;
     Paperless *client_;
     bool inited_ = false;
 
+    QList<int> customFieldList() const;
 };
 
 #endif // DOCUMENTMODEL_H

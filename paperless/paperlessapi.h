@@ -43,6 +43,9 @@ public:
 
     Reply<bool> login(const QString &username, const QString &password);
 
+    Reply<ReturnList<Document>> getDocumentList(const SavedView &view);
+
+
 signals:
     void tokenChanged();
 
