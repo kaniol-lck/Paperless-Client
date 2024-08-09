@@ -44,7 +44,6 @@ private:
     void addWindow(QMainWindow *window, WindowCategory category);
     QMdiSubWindow *addSubWindowForItem(QStandardItem *item);
     void removeSubWindowForItem(QStandardItem *item);
-    // void removeExploreBrowser(ExploreBrowser *exploreBrowser);
     int findViewWidget(SavedView view);
 
     Paperless *client_;

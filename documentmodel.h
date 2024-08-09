@@ -5,10 +5,11 @@
 #include "paperless/ReturnList.hpp"
 #include <QAbstractTableModel>
 
+class Paperless;
 class DocumentModel : public QAbstractTableModel
 {
 public:
-    explicit DocumentModel(QObject *parent = nullptr);
+    explicit DocumentModel(QObject *parent/* = nullptr*/, Paperless *client);
 
     enum Column{
         IdColumn,
@@ -39,12 +40,15 @@ public:
     int rowCount(const QModelIndex &parent = QModelIndex()) const override;
     int columnCount(const QModelIndex &parent = QModelIndex()) const override;
     QVariant data(const QModelIndex &index, int role = Qt::DisplayRole) const override;
+    QVariant headerData(int section, Qt::Orientation orientation, int role) const override;
 
     void setList(const ReturnList<Document> &newList);
 
 private:
     ReturnList<Document> list_;
+    Paperless *client_;
     bool inited_ = false;
+
 };
 
 #endif // DOCUMENTMODEL_H

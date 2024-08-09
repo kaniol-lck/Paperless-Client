@@ -5,13 +5,15 @@
 
 #include <paperless/paperlessapi.h>
 
-ViewWidget::ViewWidget(QWidget *parent, SavedView view) :
+ViewWidget::ViewWidget(QWidget *parent, Paperless *client, SavedView view) :
     QMainWindow(parent),
     ui(new Ui::ViewWidget),
+    client_(client),
     view_(view),
-    model_(new DocumentModel(this))
+    model_(new DocumentModel(this, client))
 {
     ui->setupUi(this);
+    setWindowTitle(view_.name);
     ui->treeView->setModel(model_);
     getDocs();
 }

@@ -24,6 +24,7 @@ HEADERS += \
     client.h \
     documentmodel.h \
     pageswitcher.h \
+    paperless/Correspondent.h \
     paperless/Document.h \
     logindialog.h \
     paperless/DocumentType.h \

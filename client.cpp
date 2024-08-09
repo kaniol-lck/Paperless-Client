@@ -20,7 +20,8 @@ Client::Client(QWidget *parent) :
 
     pageSwitcher_->addMainPage();
     pageSwitcher_->addDocumentsPage();
-    client_->updateSavedViewList();
+
+    client_->updateAllList();
 }
 
 Client::~Client()
@@ -33,7 +34,7 @@ void Client::on_actionLogin_triggered()
     auto dialog = new LoginDialog(this);
     dialog->show();
     connect(dialog, &QDialog::accepted, this, [this]{
-        client_->updateSavedViewList();
+        client_->updateAllList();
     });
 }
 

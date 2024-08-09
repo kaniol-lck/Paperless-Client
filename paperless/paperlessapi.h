@@ -6,6 +6,7 @@
 #include <QNetworkRequestFactory>
 #include <QList>
 
+#include "paperless/Correspondent.h"
 #include "reply.hpp"
 #include "ReturnList.hpp"
 #include "paperless/Document.h"
@@ -35,6 +36,8 @@ public:
     DEFINE_RETURNLIST_API(custom_fields, CustomField);
     DEFINE_RETURNLIST_API(document_types, DocumentType);
     DEFINE_RETURNLIST_API(storage_paths, StoragePath);
+    DEFINE_RETURNLIST_API(tags, Tag);
+    DEFINE_RETURNLIST_API(correspondents, Correspondent);
 
     void setUrl(const QUrl &newUrl);
 

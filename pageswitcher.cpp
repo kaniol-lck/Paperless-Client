@@ -40,7 +40,7 @@ void PageSwitcher::addMainPage()
 
 void PageSwitcher::addDocumentsPage()
 {
-    addWindow(new ViewWidget(this), Main);
+    addWindow(new ViewWidget(this, client_), Main);
 }
 
 ViewWidget *PageSwitcher::viewWidget(int index) const
@@ -125,7 +125,7 @@ void PageSwitcher::syncViewList()
     for(const auto &view : viewList){
         if(auto i = findViewWidget(view); i < 0){
             //not present, new one
-            addViewWidget(new ViewWidget(this, view));
+            addViewWidget(new ViewWidget(this, client_, view));
         } else{
             //present, move position
             oldCount--;

@@ -3,6 +3,7 @@
 #include <QRestReply>
 #include <QJsonDocument>
 #include <QJsonObject>
+#include <QSettings>
 
 #include "util.hpp"
 
@@ -11,6 +12,11 @@ PaperlessApi::PaperlessApi(QObject *parent) :
     manager_(new QNetworkAccessManager)
 {
     api_.commonHeaders().append(QHttpHeaders::WellKnownHeader::ContentType, "application/json");
+    api_.setBaseUrl(QSettings().value("url").toUrl());
+    token_ = QSettings().value("token").toString();
+    QHttpHeaders headers;
+    headers.append("Authorization", "Token " + token_);
+    api_.setCommonHeaders(headers);
 }
 
 PaperlessApi *PaperlessApi::api()
@@ -27,6 +33,7 @@ void PaperlessApi::setUrl(const QUrl &newUrl)
 
 Reply<bool> PaperlessApi::login(const QString &username, const QString &password)
 {
+    api_.clearCommonHeaders();
     QVariantMap data;
     data.insert("username", {username});
     data.insert("password", {password});
@@ -38,6 +45,8 @@ Reply<bool> PaperlessApi::login(const QString &username, const QString &password
                     QHttpHeaders headers;
                     headers.append("Authorization", "Token " + token_);
                     api_.setCommonHeaders(headers);
+                    QSettings().setValue("url", api_.baseUrl());
+                    QSettings().setValue("token", token_);
                     emit tokenChanged();
                     getDocumentList();
                     return true;

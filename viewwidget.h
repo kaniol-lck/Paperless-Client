@@ -5,6 +5,8 @@
 #include <QMainWindow>
 
 
+
+class Paperless;
 namespace Ui {
 class ViewWidget;
 }
@@ -14,7 +16,7 @@ class ViewWidget : public QMainWindow
     Q_OBJECT
 
 public:
-    explicit ViewWidget(QWidget *parent = nullptr, SavedView view = SavedView());
+    explicit ViewWidget(QWidget *parent/* = nullptr*/, Paperless *client, SavedView view = SavedView());
     ~ViewWidget();
 
     void getDocs();
@@ -23,6 +25,7 @@ public:
 
 private:
     Ui::ViewWidget *ui;
+    Paperless *client_;
     SavedView view_;
     DocumentModel *model_;
 };
