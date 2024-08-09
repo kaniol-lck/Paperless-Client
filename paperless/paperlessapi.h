@@ -9,6 +9,7 @@
 #include "reply.hpp"
 #include "ReturnList.hpp"
 #include "paperless/Document.h"
+#include "paperless/DocumentType.h"
 #include "paperless/SavedView.h"
 #include "paperless/customField.h"
 #include "paperless/StoragePath.h"
@@ -32,6 +33,7 @@ public:
     DEFINE_RETURNLIST_API(documents, Document);
     DEFINE_RETURNLIST_API(saved_views, SavedView);
     DEFINE_RETURNLIST_API(custom_fields, CustomField);
+    DEFINE_RETURNLIST_API(document_types, DocumentType);
     DEFINE_RETURNLIST_API(storage_paths, StoragePath);
 
     void setUrl(const QUrl &newUrl);

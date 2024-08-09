@@ -8,7 +8,7 @@
 template<typename T>
 struct ReturnList
 {
-    static ReturnList fromVariant(const QVariant &variant)
+    static auto fromVariant(const QVariant &variant)
     {
         ReturnList list;
         set_attr(list, variant, count, Int);

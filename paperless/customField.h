@@ -5,7 +5,7 @@
 
 struct CustomField
 {
-    static CustomField fromVariant(const QVariant &variant){
+    static auto fromVariant(const QVariant &variant){
         CustomField customField;
         set_attr(customField, variant, field, Int);
         set_attr(customField, variant, value, String);

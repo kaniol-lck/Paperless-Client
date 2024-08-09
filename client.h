@@ -1,6 +1,7 @@
 #ifndef CLIENT_H
 #define CLIENT_H
 
+#include "paperless/paperless.h"
 #include <QMainWindow>
 
 QT_BEGIN_NAMESPACE
@@ -8,6 +9,8 @@ namespace Ui {
 class Client;
 }
 QT_END_NAMESPACE
+
+class PageSwitcher;
 
 class Client : public QMainWindow
 {
@@ -22,5 +25,7 @@ private slots:
 
 private:
     Ui::Client *ui;
+    Paperless *client_;
+    PageSwitcher *pageSwitcher_;
 };
 #endif // CLIENT_H

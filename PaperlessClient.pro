@@ -13,25 +13,32 @@ SOURCES += \
     documentmodel.cpp \
     logindialog.cpp \
     main.cpp \
+    pageswitcher.cpp \
+    paperless/paperless.cpp \
     paperless/paperlessapi.cpp \
     savedviewmodel.cpp \
-    viewwidget.cpp
+    viewwidget.cpp \
+    windowselectorwidget.cpp
 
 HEADERS += \
     client.h \
     documentmodel.h \
+    pageswitcher.h \
     paperless/Document.h \
     logindialog.h \
+    paperless/DocumentType.h \
     paperless/ReturnList.hpp \
     paperless/SavedView.h \
     paperless/StoragePath.h \
     paperless/Tag.h \
     paperless/customField.h \
+    paperless/paperless.h \
     paperless/paperlessapi.h \
     reply.hpp \
     savedviewmodel.h \
     util.hpp \
-    viewwidget.h
+    viewwidget.h \
+    windowselectorwidget.h
 
 FORMS += \
     client.ui \

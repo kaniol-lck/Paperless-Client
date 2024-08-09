@@ -5,9 +5,10 @@
 
 #include <paperless/paperlessapi.h>
 
-ViewWidget::ViewWidget(QWidget *parent) :
+ViewWidget::ViewWidget(QWidget *parent, SavedView view) :
     QMainWindow(parent),
     ui(new Ui::ViewWidget),
+    view_(view),
     model_(new DocumentModel(this))
 {
     ui->setupUi(this);
@@ -26,4 +27,9 @@ void ViewWidget::getDocs()
     reply.setOnFinished(this, [this](const auto &list){
         model_->setList(list);
     });
+}
+
+SavedView ViewWidget::view() const
+{
+    return view_;
 }
