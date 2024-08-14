@@ -31,7 +31,7 @@ Client::~Client()
 
 void Client::on_actionLogin_triggered()
 {
-    auto dialog = new LoginDialog(this);
+    auto dialog = new LoginDialog(client_, this);
     dialog->show();
     connect(dialog, &QDialog::accepted, this, [this]{
         client_->updateAllList();

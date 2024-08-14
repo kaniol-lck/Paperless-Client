@@ -12,17 +12,33 @@ PaperlessApi::PaperlessApi(QObject *parent) :
     manager_(new QNetworkAccessManager)
 {
     api_.commonHeaders().append(QHttpHeaders::WellKnownHeader::ContentType, "application/json");
-    api_.setBaseUrl(QSettings().value("url").toUrl());
+    url_ = QSettings().value("url").toUrl();
+    api_.setBaseUrl(url_);
     token_ = QSettings().value("token").toString();
     QHttpHeaders headers;
     headers.append("Authorization", "Token " + token_);
     api_.setCommonHeaders(headers);
 }
 
-PaperlessApi *PaperlessApi::api()
+QUrl PaperlessApi::documentDownloadUrl(Document document)
 {
-    static PaperlessApi paperlessApi;
-    return &paperlessApi;
+    QUrl url(url_);
+    url.setPath(QString("/api/documents/%1/download/").arg(document.id));
+    return url;
+}
+
+QUrl PaperlessApi::documentPreviewUrl(Document document)
+{
+    QUrl url(url_);
+    url.setPath(QString("/api/documents/%1/preview/").arg(document.id));
+    return url;
+}
+
+QUrl PaperlessApi::documentThumbUrl(Document document)
+{
+    QUrl url(url_);
+    url.setPath(QString("/api/documents/%1/thumb/").arg(document.id));
+    return url;
 }
 
 void PaperlessApi::setUrl(const QUrl &newUrl)
@@ -54,27 +70,4 @@ Reply<bool> PaperlessApi::login(const QString &username, const QString &password
                 return false;
             }
     };
-}
-
-Reply<ReturnList<Document> > PaperlessApi::getDocumentList(const SavedView &view)
-{
-    QUrlQuery query;
-    for(auto &&rule : view.filter_rules){
-        // TODO: filter
-        if(rule.rule_type == 30){
-            query.addQueryItem("storage_path__id", rule.value);
-        } else if(rule.rule_type == 28){
-            query.addQueryItem("document_type__id", rule.value);
-        }
-    }
-    auto request = api_.createRequest(documents, query);
-    return { manager_.get(request), [](auto reply){
-                QRestReply restReply(reply);
-                if (const auto json = restReply.readJson(); json && json->isObject()) {
-                    auto result = json->toVariant();
-                    auto list = ReturnList<Document>::fromVariant(result);
-                    return list;
-                }
-                return ReturnList<Document>{};
-            }};
 }

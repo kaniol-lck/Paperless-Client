@@ -1,13 +1,15 @@
 #include "logindialog.h"
+#include "paperless/paperless.h"
 #include "ui_logindialog.h"
 
 #include "paperless/paperlessapi.h"
 
 #include <QMessageBox>
 
-LoginDialog::LoginDialog(QWidget *parent)
-    : QDialog(parent)
-    , ui(new Ui::LoginDialog)
+LoginDialog::LoginDialog(Paperless *client, QWidget *parent) :
+    QDialog(parent),
+    ui(new Ui::LoginDialog),
+    client_(client)
 {
     ui->setupUi(this);
     ui->progressBar->hide();
@@ -21,8 +23,8 @@ LoginDialog::~LoginDialog()
 void LoginDialog::on_buttonBox_accepted()
 {
     ui->progressBar->show();
-    PaperlessApi::api()->setUrl(ui->server->text());
-    auto reply = PaperlessApi::api()->login(ui->username->text(),
+    client_->api()->setUrl(ui->server->text());
+    auto reply = client_->api()->login(ui->username->text(),
                                             ui->password->text());
     reply.setOnFinished(this, [this](bool success){
         if(success){

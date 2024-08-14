@@ -2,8 +2,13 @@
 
 Paperless::Paperless(QObject *parent) :
     QObject(parent),
-    api_(PaperlessApi::api())
+    api_(new PaperlessApi(this))
 {}
+
+PaperlessApi *Paperless::api() const
+{
+    return api_;
+}
 
 // Paperless *Paperless::client()
 // {

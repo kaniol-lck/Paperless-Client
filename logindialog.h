@@ -7,12 +7,14 @@ namespace Ui {
 class LoginDialog;
 }
 
+class Paperless;
+
 class LoginDialog : public QDialog
 {
     Q_OBJECT
 
 public:
-    explicit LoginDialog(QWidget *parent = nullptr);
+    explicit LoginDialog(Paperless *client, QWidget *parent = nullptr);
     ~LoginDialog();
 
 private slots:
@@ -20,6 +22,7 @@ private slots:
 
 private:
     Ui::LoginDialog *ui;
+    Paperless *client_;
 };
 
 #endif // LOGINDIALOG_H

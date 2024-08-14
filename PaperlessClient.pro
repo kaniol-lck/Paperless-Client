@@ -11,6 +11,7 @@ CONFIG += c++17
 SOURCES += \
     client.cpp \
     documentmodel.cpp \
+    filtermenu.cpp \
     logindialog.cpp \
     main.cpp \
     pageswitcher.cpp \
@@ -22,6 +23,7 @@ SOURCES += \
 HEADERS += \
     client.h \
     documentmodel.h \
+    filtermenu.h \
     pageswitcher.h \
     paperless/Correspondent.h \
     paperless/Document.h \

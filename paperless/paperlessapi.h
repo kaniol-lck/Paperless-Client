@@ -19,9 +19,17 @@
 static constexpr auto name = "/api/"#name"/";
 
 #define DEFINE_RETURNLIST_API(name, Type) \
-Reply<ReturnList<Type>> get##Type##List()  \
+Reply<ReturnList<Type>> get##Type##List(const QUrlQuery &query)  \
 { \
-    return getReturnList<Type>(name); \
+    return getReturnList<Type>(name, query); \
+} \
+Reply<ReturnList<Type>> get##Type##List(int page = 0)  \
+{ \
+    return getReturnList<Type>(name, page); \
+} \
+Reply<ReturnList<Type>> get##Type##List(const QUrl &url)  \
+{ \
+    return getReturnList<Type>(url); \
 }
 
 class PaperlessApi : public QObject
@@ -29,7 +37,6 @@ class PaperlessApi : public QObject
     Q_OBJECT
 public:
     explicit PaperlessApi(QObject *parent = nullptr);
-    static PaperlessApi *api();
 
     DEFINE_RETURNLIST_API(documents, Document);
     DEFINE_RETURNLIST_API(saved_views, SavedView);
@@ -39,11 +46,13 @@ public:
     DEFINE_RETURNLIST_API(tags, Tag);
     DEFINE_RETURNLIST_API(correspondents, Correspondent);
 
+    QUrl documentDownloadUrl(Document document);
+    QUrl documentPreviewUrl(Document document);
+    QUrl documentThumbUrl(Document document);
+
     void setUrl(const QUrl &newUrl);
 
     Reply<bool> login(const QString &username, const QString &password);
-
-    Reply<ReturnList<Document>> getDocumentList(const SavedView &view);
 
 
 signals:
@@ -77,17 +86,48 @@ private:
     DEFINE_API(config)
 
     template<typename T>
-    inline Reply<ReturnList<T> > getReturnList(QString field)
+    inline Reply<ReturnList<T> > getReturnList(QNetworkRequest request)
     {
-        return { manager_.get(api_.createRequest(field)), [](auto reply){
+        return { manager_.get(request), [](auto reply){
                     QRestReply restReply(reply);
-                    if (const auto json = restReply.readJson(); json && json->isObject()) {
-                        auto result = json->toVariant();
-                        auto list = ReturnList<T>::fromVariant(result);
-                        return list;
-                    }
-                    return ReturnList<T>{};
+                    return returnList<T>(restReply);
                 }};
+    }
+
+    template<typename T>
+    inline Reply<ReturnList<T> > getReturnList(const QString &field, QUrlQuery query)
+    {
+        return getReturnList<T>(api_.createRequest(field, query));
+    }
+
+    template<typename T>
+    inline Reply<ReturnList<T> > getReturnList(const QString &field, int page = 0)
+    {
+        if(page != 0){
+            QUrlQuery query;
+            query.addQueryItem("page", QString::number(page));
+            return getReturnList<T>(field, query);
+        }
+        return getReturnList<T>(api_.createRequest(field));
+    }
+
+    template<typename T>
+    inline Reply<ReturnList<T> > getReturnList(const QUrl &url)
+    {
+        auto request = api_.createRequest();
+        request.setUrl(url);
+        return getReturnList<T>(request);
+    }
+
+    template<typename T>
+    static inline ReturnList<T> returnList(QRestReply &reply)
+    {
+        if (const auto json = reply.readJson(); json && json->isObject()) {
+            auto result = json->toVariant();
+            auto list = ReturnList<T>::fromVariant(result);
+            return list;
+        }
+        return ReturnList<T>{};
     }
 };
 

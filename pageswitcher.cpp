@@ -40,7 +40,9 @@ void PageSwitcher::addMainPage()
 
 void PageSwitcher::addDocumentsPage()
 {
-    addWindow(new ViewWidget(this, client_), Main);
+    SavedView view;
+    view.name = "Document";
+    addWindow(new ViewWidget(this, client_, view), Main);
 }
 
 ViewWidget *PageSwitcher::viewWidget(int index) const

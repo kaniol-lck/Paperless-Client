@@ -137,6 +137,15 @@ QList<int> DocumentModel::sectionList(const SavedView &view)
     return list;
 }
 
+Document DocumentModel::documentAt(const QModelIndex &index)
+{
+    return list_.results.at(index.row());
+}
+
+ReturnList<Document> &DocumentModel::list()
+{
+    return list_;
+}
 
 QVariant DocumentModel::headerData(int section, Qt::Orientation orientation, int role) const
 {

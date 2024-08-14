@@ -47,6 +47,10 @@ public:
 
     QList<int> sectionList(const SavedView &view);
 
+    Document documentAt(const QModelIndex &index);
+
+    ReturnList<Document> &list();
+
 private:
     ReturnList<Document> list_;
     Paperless *client_;
