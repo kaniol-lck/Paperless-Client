@@ -29,6 +29,7 @@ HEADERS += \
     paperless/Document.h \
     logindialog.h \
     paperless/DocumentType.h \
+    paperless/Group.h \
     paperless/ReturnList.hpp \
     paperless/SavedView.h \
     paperless/StoragePath.h \
@@ -36,6 +37,7 @@ HEADERS += \
     paperless/customField.h \
     paperless/paperless.h \
     paperless/paperlessapi.h \
+    paperless/user.h \
     reply.hpp \
     util.hpp \
     viewwidget.h \

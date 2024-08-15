@@ -25,8 +25,18 @@ public:
     NEW_FILTER(CustomField, field);
     NEW_FILTER(StoragePath, path);
     NEW_FILTER(Tag, tag);
+    NEW_FILTER(User, user);
 
-    static FilterMenu *fromRuleType(int ruleType, Paperless *client, QWidget *parent);
+    enum RuleType{
+        TagIn = 22,
+        CorrespondentIn = 26,
+        DocumentIn = 28,
+        StoragePathIn = 30,
+        OwnerIn = 33,
+        CustomFieldIn = 39,
+    };
+
+    static FilterMenu *fromRuleType(RuleType ruleType, Paperless *client, QWidget *parent);
     static QList<FilterMenu *> filtersFromView(const SavedView &view, Paperless *client, QWidget *parent);
 
     void setItemList(const QMap<int, QString> &newItemList);
@@ -39,7 +49,7 @@ signals:
 
 private:
     QMap<int, QString> itemList_;
-    int ruleType_;
+    RuleType ruleType_;
     QStringList checkedIds_;
 
     void updateList();
@@ -49,6 +59,13 @@ private:
         QMap<int, QString> list;
         for(auto &&type : l)
             list.insert(type.id, type.name);
+        setItemList(list);
+    }
+
+    void setList(QList<User> l){
+        QMap<int, QString> list;
+        for(auto &&type : l)
+            list.insert(type.id, type.username);
         setItemList(list);
     }
 

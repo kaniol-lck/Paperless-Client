@@ -74,7 +74,7 @@ QVariant DocumentModel::data(const QModelIndex &index, int role) const
         case ArchivedFileNameColumn:
             return document.archived_file_name;
         case OwnerColumn:
-            return document.owner;
+            return client_->getUserName(document.owner);
         case UserCanChangeColumn:
             return document.user_can_change;
         case IsSharedByRequesterColumn:

@@ -45,6 +45,8 @@ public:
         updateStoragePathList();
         updateTagList();
         updateCorrespondentList();
+        updateUserList();
+        updateGroupList();
     }
 
     ID2NAME(Correspondent, correspondent);
@@ -53,6 +55,12 @@ public:
     ID2NAME(CustomField, field);
     ID2NAME(StoragePath, path);
     ID2NAME(Tag, tag);
+    QString getUserName(int id) const{
+            for(auto &&v : userList_)
+            if(v.id == id) return v.username;
+            return QString::number(id);
+    }
+    ID2NAME(Group, group);
 
     PaperlessApi *api() const;
 
@@ -64,6 +72,8 @@ signals:
     DEFINE_LIST_S(CustomField, field);
     DEFINE_LIST_S(StoragePath, path);
     DEFINE_LIST_S(Tag, tag);
+    DEFINE_LIST_S(User, user);
+    DEFINE_LIST_S(Group, group);
 
 private:
     PaperlessApi *api_;
@@ -75,6 +85,8 @@ private:
     DEFINE_LIST(CustomField, field);
     DEFINE_LIST(StoragePath, path);
     DEFINE_LIST(Tag, tag);
+    DEFINE_LIST(User, user);
+    DEFINE_LIST(Group, group);
 };
 
 #endif // PAPERLESS_H

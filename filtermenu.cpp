@@ -8,17 +8,21 @@ FilterMenu::FilterMenu(const QString &name, QWidget *parent) :
     menuAction()->setText(name);
 }
 
-FilterMenu *FilterMenu::fromRuleType(int ruleType, Paperless *client, QWidget *parent = nullptr)
+FilterMenu *FilterMenu::fromRuleType(RuleType ruleType, Paperless *client, QWidget *parent = nullptr)
 {
     switch (ruleType) {
-    case 22:
+    case TagIn:
         return newTagFilter(client, parent);
-    case 26:
+    case CorrespondentIn:
         return newCorrespondentFilter(client, parent);
-    case 28:
+    case DocumentIn:
         return newDocumentTypeFilter(client, parent);
-    case 30:
+    case StoragePathIn:
         return newStoragePathFilter(client, parent);
+    case OwnerIn:
+        return newUserFilter(client, parent);
+    case CustomFieldIn:
+        return newCustomFieldFilter(client, parent);
     default:
         return nullptr;
     }
@@ -29,12 +33,12 @@ QList<FilterMenu*> FilterMenu::filtersFromView(const SavedView &view, Paperless 
     //TODO
     QList<FilterMenu*> list;
     static auto ruleTypeList = {
-        22, // tag
-        26, // correspondent
-        28, // document type
-        30, // storage path
-        // 33, // owener
-        // 39, // custom field
+        TagIn, // tag
+        CorrespondentIn, // correspondent
+        DocumentIn, // document type
+        StoragePathIn, // storage path
+        OwnerIn, // owner
+        CustomFieldIn, // custom field
     };
     for(auto id : ruleTypeList){
         auto menu = fromRuleType(id, client, parent);
@@ -76,14 +80,18 @@ void FilterMenu::setItemList(const QMap<int, QString> &newItemList)
 QString FilterMenu::rule() const
 {
     switch (ruleType_) {
-    case 22:
+    case TagIn:
         return "tags__id__in";
-    case 26:
+    case CorrespondentIn:
         return "correspondent__id__in";
-    case 28:
+    case DocumentIn:
         return "document_type__id__in";
-    case 30:
+    case StoragePathIn:
         return "storage_path__id__in";
+    case OwnerIn:
+        return "owner__id__in";
+    case CustomFieldIn:
+        return "custom_fields__id__in";
     default:
         return "wtf";
     }

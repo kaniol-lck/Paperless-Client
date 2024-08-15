@@ -7,6 +7,8 @@
 #include <QList>
 
 #include "paperless/Correspondent.h"
+#include "paperless/Group.h"
+#include "paperless/user.h"
 #include "reply.hpp"
 #include "ReturnList.hpp"
 #include "paperless/Document.h"
@@ -45,6 +47,8 @@ public:
     DEFINE_RETURNLIST_API(storage_paths, StoragePath);
     DEFINE_RETURNLIST_API(tags, Tag);
     DEFINE_RETURNLIST_API(correspondents, Correspondent);
+    DEFINE_RETURNLIST_API(users, User);
+    DEFINE_RETURNLIST_API(groups, Group);
 
     QUrl documentDownloadUrl(Document document);
     QUrl documentPreviewUrl(Document document);
