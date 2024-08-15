@@ -27,7 +27,7 @@ public:
     SavedView view() const;
 public slots:
     void getDocs();
-    void search();
+    void search(int page = 1);
     void updateSections();
     void setList(const ReturnList<Document> &list);
 
@@ -47,6 +47,7 @@ private:
     SavedView view_;
     DocumentModel *model_;
     QList<FilterMenu*> filters_;
+    bool isNewSearch_ = true;
 
     QToolButton *filter2button(FilterMenu *filter);
 };

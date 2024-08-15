@@ -98,8 +98,10 @@ QVariant DocumentModel::data(const QModelIndex &index, int role) const
 
 void DocumentModel::setList(const ReturnList<Document> &newList)
 {
+    beginResetModel();
     list_ = newList;
     inited_ = true;
+    endResetModel();
 }
 
 QList<int> DocumentModel::sectionList(const SavedView &view)

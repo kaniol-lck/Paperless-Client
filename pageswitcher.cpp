@@ -125,6 +125,7 @@ void PageSwitcher::syncViewList()
     auto oldCount = model_.item(View)->rowCount();
     auto viewList = client_->viewList();
     for(const auto &view : viewList){
+        if(!view.show_in_sidebar) continue;
         if(auto i = findViewWidget(view); i < 0){
             //not present, new one
             addViewWidget(new ViewWidget(this, client_, view));

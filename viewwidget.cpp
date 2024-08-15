@@ -28,12 +28,13 @@ ViewWidget::ViewWidget(QWidget *parent, Paperless *client, SavedView view) :
     // search bar
     ui->searchBar->insertWidget(ui->actionSearch, searchSelect_);
     ui->searchBar->insertWidget(ui->actionSearch, searchLine_);
+    connect(searchLine_, &QLineEdit::editingFinished, this, &ViewWidget::getDocs);
+
     ui->searchBar->addSeparator();
     filters_ = FilterMenu::filtersFromView(view_, client_, this);
     for(auto menu : filters_){
         ui->searchBar->addWidget(filter2button(menu));
         connect(menu, &FilterMenu::filterChanged, this, [=]{
-            qDebug() << menu->checkedIds();
             search();
         });
     }
@@ -44,6 +45,10 @@ ViewWidget::ViewWidget(QWidget *parent, Paperless *client, SavedView view) :
 
     // page bar
     ui->pageBar->insertWidget(ui->actionNext_Page, pageSelect_);
+    connect(pageSelect_, &QComboBox::currentIndexChanged, this, [this](int index){
+        isNewSearch_ = false;
+        search(index + 1);
+    });
 
     ui->treeView->dragEnabled();
     ui->treeView->setModel(model_);
@@ -60,21 +65,37 @@ void ViewWidget::getDocs()
     search();
 }
 
-void ViewWidget::search()
+void ViewWidget::search(int page)
 {
     QUrlQuery query;
+    // page
+    if(page > 1)
+        query.addQueryItem("page", QString::number(page));
+
+    // search
     auto searchKey = searchSelect_->currentData().toString();
     auto searchValue = searchLine_->text();
     if(!searchValue.isEmpty())
         query.addQueryItem(searchKey, searchValue);
+
+    // filter
     for(auto filter : filters_){
         if(!filter->checkedIds().isEmpty())
             query.addQueryItem(filter->rule(), filter->checkedIds().join(','));
     }
-    qDebug() << query.toString();
+
+    // ordering
+    if(!view_.sort_field.isEmpty()){
+        if(view_.sort_reverse)
+            query.addQueryItem("ordering", view_.sort_field);
+        else
+            query.addQueryItem("ordering", "-" + view_.sort_field);
+    }
+
+    // qDebug() << query.toString();
+    //reply
     auto reply = client_->api()->getDocumentList(query);
     reply.setOnFinished(this, [this](auto &&list){
-        qDebug() << list.results.size();
         setList(list);
     });
 }
@@ -104,11 +125,19 @@ void ViewWidget::updateSections()
 void ViewWidget::setList(const ReturnList<Document> &list)
 {
     model_->setList(list);
-    ui->treeView->repaint();
     ui->actionPrevious_Page->setEnabled(list.previous.isValid());
     ui->actionNext_Page->setEnabled(list.next.isValid());
+    if(isNewSearch_){
+        pageSelect_->blockSignals(true);
+        pageSelect_->clear();
+        for(int i = 1; i <= list.count / 25 + 1; i++){
+            pageSelect_->addItem(QString("page %1").arg(i));
+        }
+        pageSelect_->blockSignals(false);
+    }
     updateSections();
     ui->treeView->header()->resizeSections(QHeaderView::ResizeToContents);
+    isNewSearch_ = true;
 }
 
 void ViewWidget::on_treeView_doubleClicked(const QModelIndex &index)
@@ -120,24 +149,12 @@ void ViewWidget::on_treeView_doubleClicked(const QModelIndex &index)
 
 void ViewWidget::on_actionPrevious_Page_triggered()
 {
-    ui->actionPrevious_Page->setEnabled(false);
-    auto url = model_->list().previous;
-    if(!url.isValid()) return;
-    auto reply = client_->api()->getDocumentList(url);
-    reply.setOnFinished(this, [this](auto &&list){
-        setList(list);
-    });
+    pageSelect_->setCurrentIndex(pageSelect_->currentIndex() - 1);
 }
 
 void ViewWidget::on_actionNext_Page_triggered()
 {
-    ui->actionNext_Page->setEnabled(false);
-    auto url = model_->list().next;
-    if(!url.isValid()) return;
-    auto reply = client_->api()->getDocumentList(url);
-    reply.setOnFinished(this, [this](auto &&list){
-        setList(list);
-    });
+    pageSelect_->setCurrentIndex(pageSelect_->currentIndex() + 1);
 }
 
 void ViewWidget::on_actionSearch_triggered()
