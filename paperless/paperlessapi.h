@@ -50,13 +50,14 @@ public:
     DEFINE_RETURNLIST_API(users, User);
     DEFINE_RETURNLIST_API(groups, Group);
 
-    QUrl documentDownloadUrl(Document document);
-    QUrl documentPreviewUrl(Document document);
-    QUrl documentThumbUrl(Document document);
+    QUrl documentDownloadUrl(const Document &document);
+    QUrl documentPreviewUrl(const Document &document);
+    QUrl documentThumbUrl(const Document &document);
+    Reply<QPixmap> getDocumentThumb(const Document &document);
 
     void setUrl(const QUrl &newUrl);
 
-    Reply<bool> login(const QString &username, const QString &password);
+    Reply<bool> login(const QUrl &url, const QString &username, const QString &password);
 
 
 signals:

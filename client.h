@@ -22,10 +22,12 @@ public:
 
 private slots:
     void on_actionLogin_triggered();
+    void mergeMenuBar();
 
 private:
     Ui::Client *ui;
     Paperless *client_;
     PageSwitcher *pageSwitcher_;
+    QMenuBar *menuBar_;
 };
 #endif // CLIENT_H

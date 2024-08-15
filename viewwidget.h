@@ -36,6 +36,10 @@ private slots:
     void on_actionPrevious_Page_triggered();
     void on_actionNext_Page_triggered();
     void on_actionSearch_triggered();
+    void on_treeView_customContextMenuRequested(const QPoint &pos);
+    void on_actionPreview_triggered();
+    void on_actionDownload_triggered();
+    void onSelectedChanged();
 
 private:
     Ui::ViewWidget *ui;
@@ -48,6 +52,7 @@ private:
     DocumentModel *model_;
     QList<FilterMenu*> filters_;
     bool isNewSearch_ = true;
+    int selectedRow_ = -1;
 
     QToolButton *filter2button(FilterMenu *filter);
 };

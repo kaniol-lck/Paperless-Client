@@ -9,6 +9,7 @@ CONFIG += c++17
 #DEFINES += QT_DISABLE_DEPRECATED_BEFORE=0x060000    # disables all the APIs deprecated before Qt 6.0.0
 
 SOURCES += \
+    accountwindow.cpp \
     client.cpp \
     documentmodel.cpp \
     filtermenu.cpp \
@@ -17,10 +18,13 @@ SOURCES += \
     pageswitcher.cpp \
     paperless/paperless.cpp \
     paperless/paperlessapi.cpp \
+    settingswindow.cpp \
+    unclosedmenu.cpp \
     viewwidget.cpp \
     windowselectorwidget.cpp
 
 HEADERS += \
+    accountwindow.h \
     client.h \
     documentmodel.h \
     filtermenu.h \
@@ -39,13 +43,17 @@ HEADERS += \
     paperless/paperlessapi.h \
     paperless/user.h \
     reply.hpp \
+    settingswindow.h \
+    unclosedmenu.h \
     util.hpp \
     viewwidget.h \
     windowselectorwidget.h
 
 FORMS += \
+    accountwindow.ui \
     client.ui \
     logindialog.ui \
+    settingswindow.ui \
     viewwidget.ui
 
 # Default rules for deployment.

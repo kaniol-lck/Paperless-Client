@@ -3,7 +3,7 @@
 #include <QMenu>
 
 FilterMenu::FilterMenu(const QString &name, QWidget *parent) :
-    QMenu(parent)
+    UnclosedMenu(parent)
 {
     menuAction()->setText(name);
 }

@@ -63,6 +63,11 @@ void PageSwitcher::removeViewWidget(int index)
     removeSubWindowForItem(item);
 }
 
+void PageSwitcher::addSettingsWindow(QMainWindow *window)
+{
+    addWindow(window, Settings);
+}
+
 QPair<int, int> PageSwitcher::currentCategoryPage() const
 {
     auto window = currentSubWindow();

@@ -5,13 +5,13 @@
 #include <QJsonObject>
 #include <QSettings>
 
+#include "qpixmap.h"
 #include "util.hpp"
 
 PaperlessApi::PaperlessApi(QObject *parent) :
     QObject(parent),
     manager_(new QNetworkAccessManager)
 {
-    api_.commonHeaders().append(QHttpHeaders::WellKnownHeader::ContentType, "application/json");
     url_ = QSettings().value("url").toUrl();
     api_.setBaseUrl(url_);
     token_ = QSettings().value("token").toString();
@@ -20,25 +20,28 @@ PaperlessApi::PaperlessApi(QObject *parent) :
     api_.setCommonHeaders(headers);
 }
 
-QUrl PaperlessApi::documentDownloadUrl(Document document)
+QUrl PaperlessApi::documentDownloadUrl(const Document &document)
 {
-    QUrl url(url_);
-    url.setPath(QString("/api/documents/%1/download/").arg(document.id));
-    return url;
+    return api_.createRequest(QString("/api/documents/%1/download/").arg(document.id)).url();
 }
 
-QUrl PaperlessApi::documentPreviewUrl(Document document)
+QUrl PaperlessApi::documentPreviewUrl(const Document &document)
 {
-    QUrl url(url_);
-    url.setPath(QString("/api/documents/%1/preview/").arg(document.id));
-    return url;
+    return api_.createRequest(QString("/api/documents/%1/preview/").arg(document.id)).url();
 }
 
-QUrl PaperlessApi::documentThumbUrl(Document document)
+QUrl PaperlessApi::documentThumbUrl(const Document &document)
 {
-    QUrl url(url_);
-    url.setPath(QString("/api/documents/%1/thumb/").arg(document.id));
-    return url;
+    return api_.createRequest(QString("/api/documents/%1/thumb/").arg(document.id)).url();
+}
+
+Reply<QPixmap> PaperlessApi::getDocumentThumb(const Document &document)
+{
+    auto request = api_.createRequest(QString("/api/documents/%1/thumb/").arg(document.id));
+    return { manager_.get(request), [](auto r){
+                return QPixmap(r->readAll());
+            }
+    };
 }
 
 void PaperlessApi::setUrl(const QUrl &newUrl)
@@ -47,19 +50,22 @@ void PaperlessApi::setUrl(const QUrl &newUrl)
     api_.setBaseUrl(url_);
 }
 
-Reply<bool> PaperlessApi::login(const QString &username, const QString &password)
+Reply<bool> PaperlessApi::login(const QUrl &url, const QString &username, const QString &password)
 {
-    api_.clearCommonHeaders();
+    QNetworkRequestFactory tempApi;
+    tempApi.setBaseUrl(url);
     QVariantMap data;
     data.insert("username", {username});
     data.insert("password", {password});
-    return { manager_.post(api_.createRequest(token), data), [this](auto r){
+    return { manager_.post(tempApi.createRequest(token), data), [this, url](auto r){
                 QRestReply reply(r);
                 if (const auto json = reply.readJson(); json && json->isObject()) {
                     auto result = json->toVariant();
+                    setUrl(url);
                     token_ = value(result, "token").toString();
                     QHttpHeaders headers;
                     headers.append("Authorization", "Token " + token_);
+                    api_.clearCommonHeaders();
                     api_.setCommonHeaders(headers);
                     QSettings().setValue("url", api_.baseUrl());
                     QSettings().setValue("token", token_);

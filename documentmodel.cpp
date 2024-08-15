@@ -169,10 +169,10 @@ QVariant DocumentModel::headerData(int section, Qt::Orientation orientation, int
             return tr("storage_path");
         case TitleColumn:
             return tr("title");
-        // case ContentColumn:
-        //     return tr("content");
+        case ContentColumn:
+            return tr("content");
         case TagsColumn:
-            return "";//tr("tags");
+            return tr("tags");
         case CreatedColumn:
             return tr("created");
         case Created_dateColumn:

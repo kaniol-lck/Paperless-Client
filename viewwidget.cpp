@@ -23,17 +23,22 @@ ViewWidget::ViewWidget(QWidget *parent, Paperless *client, SavedView view) :
     model_(new DocumentModel(this, client))
 {
     ui->setupUi(this);
+    ui->treeView->setModel(model_);
     setWindowTitle(view_.name);
+
+    connect(ui->treeView->selectionModel(), &QItemSelectionModel::selectionChanged, this, &ViewWidget::onSelectedChanged);
 
     // search bar
     ui->searchBar->insertWidget(ui->actionSearch, searchSelect_);
     ui->searchBar->insertWidget(ui->actionSearch, searchLine_);
     connect(searchLine_, &QLineEdit::editingFinished, this, &ViewWidget::getDocs);
+    ui->actionSearch->setIcon(QIcon::fromTheme(QIcon::ThemeIcon::EditFind));
 
-    ui->searchBar->addSeparator();
+    // filter bar
     filters_ = FilterMenu::filtersFromView(view_, client_, this);
     for(auto menu : filters_){
-        ui->searchBar->addWidget(filter2button(menu));
+        ui->menuSearch->addAction(menu->menuAction());
+        ui->filterBar->addWidget(filter2button(menu));
         connect(menu, &FilterMenu::filterChanged, this, [=]{
             search();
         });
@@ -50,8 +55,7 @@ ViewWidget::ViewWidget(QWidget *parent, Paperless *client, SavedView view) :
         search(index + 1);
     });
 
-    ui->treeView->dragEnabled();
-    ui->treeView->setModel(model_);
+    ui->treeView->setAlternatingRowColors(true);
     getDocs();
 }
 
@@ -124,6 +128,8 @@ void ViewWidget::updateSections()
 
 void ViewWidget::setList(const ReturnList<Document> &list)
 {
+    ui->treeView->selectionModel()->clearSelection();
+    onSelectedChanged();
     model_->setList(list);
     ui->actionPrevious_Page->setEnabled(list.previous.isValid());
     ui->actionNext_Page->setEnabled(list.next.isValid());
@@ -170,3 +176,37 @@ QToolButton *ViewWidget::filter2button(FilterMenu *filter)
     button->setPopupMode(QToolButton::InstantPopup);
     return button;
 }
+
+void ViewWidget::on_treeView_customContextMenuRequested(const QPoint &pos)
+{
+    if(selectedRow_ < 0) return;
+    auto menu = new QMenu(this);
+    menu->addAction(ui->actionPreview);
+    menu->addAction(ui->actionDownload);
+    menu->exec(ui->treeView->viewport()->mapFromGlobal(pos));
+}
+
+void ViewWidget::on_actionPreview_triggered()
+{
+    if(selectedRow_ < 0) return;
+    auto &&doc = model_->list().results.at(selectedRow_);
+    QDesktopServices::openUrl(client_->api()->documentPreviewUrl(doc));
+}
+
+void ViewWidget::on_actionDownload_triggered()
+{
+    if(selectedRow_ < 0) return;
+    auto &&doc = model_->list().results.at(selectedRow_);
+    QDesktopServices::openUrl(client_->api()->documentDownloadUrl(doc));
+}
+
+void ViewWidget::onSelectedChanged()
+{
+    auto indexes = ui->treeView->selectionModel()->selectedRows();
+    selectedRow_ = indexes.isEmpty()? -1 : indexes.first().row();
+    // some enable & disables
+    bool b = !indexes.isEmpty();
+    ui->actionPreview->setEnabled(b);
+    ui->actionDownload->setEnabled(b);
+}
+

@@ -26,6 +26,8 @@ public:
     void addViewWidget(ViewWidget *viewWidget);
     void removeViewWidget(int index);
 
+    void addSettingsWindow(QMainWindow *window);
+
     QPair<int, int> currentCategoryPage() const;
     int currentCategory() const;
     int currentPage() const;
