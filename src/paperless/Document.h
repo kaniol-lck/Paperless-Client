@@ -4,9 +4,7 @@
 #include <QDateTime>
 #include <QUrl>
 
-#include "util.hpp"
-#include "Tag.h"
-#include "customField.h"
+#include "util/util.hpp"
 
 struct CustomFieldValue
 {

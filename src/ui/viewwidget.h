@@ -41,6 +41,10 @@ private slots:
     void on_actionDownload_triggered();
     void onSelectedChanged();
 
+    void on_actionBulk_Download_triggered();
+
+    void on_actionExport_CSV_triggered();
+
 private:
     Ui::ViewWidget *ui;
     QComboBox *searchSelect_;
@@ -52,7 +56,7 @@ private:
     DocumentModel *model_;
     QList<FilterMenu*> filters_;
     bool isNewSearch_ = true;
-    int selectedRow_ = -1;
+    QList<int> selectedDocs_;
 
     QToolButton *filter2button(FilterMenu *filter);
 };

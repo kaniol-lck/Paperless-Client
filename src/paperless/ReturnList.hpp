@@ -3,7 +3,7 @@
 
 #include <Qurl>
 
-#include "util.hpp"
+#include "util/util.hpp"
 
 template<typename T>
 struct ReturnList

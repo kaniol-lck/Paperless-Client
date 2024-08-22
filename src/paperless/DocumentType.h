@@ -1,16 +1,15 @@
-#ifndef STORAGEPATH_H
-#define STORAGEPATH_H
+#ifndef DOCUMENTTYPE_H
+#define DOCUMENTTYPE_H
 
-#include "util.hpp"
+#include "util/util.hpp"
 
-struct StoragePath
+struct DocumentType
 {
     static auto fromVariant(const QVariant &variant){
-        StoragePath path;
+        DocumentType path;
         set_attr(path, variant, id, Int);
         set_attr(path, variant, slug, String);
         set_attr(path, variant, name, String);
-        set_attr(path, variant, path, String);
         set_attr(path, variant, match, String);
         set_attr(path, variant, matching_algorithm, Int);
         set_attr(path, variant, is_insensitive, Bool);
@@ -23,7 +22,6 @@ struct StoragePath
     int id;
     QString slug;
     QString name;
-    QString path;
     QString match;
     int matching_algorithm;
     bool is_insensitive;
@@ -32,4 +30,4 @@ struct StoragePath
     bool user_can_change;
 };
 
-#endif // STORAGEPATH_H
+#endif // DOCUMENTTYPE_H

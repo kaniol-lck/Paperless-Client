@@ -1,5 +1,6 @@
 #include "client.h"
 #include "accountwindow.h"
+#include "util/curldownloader.h"
 #include "settingswindow.h"
 #include "ui_client.h"
 
@@ -18,6 +19,8 @@ Client::Client(QWidget *parent) :
 QTreeView::item {
   min-height: 28px;
 })");
+
+    auto downloader = new CurlDownloader(this);
 
     menuBar_ = new QMenuBar(this);
     menuBar_->hide();

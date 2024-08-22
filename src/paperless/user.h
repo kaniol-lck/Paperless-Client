@@ -1,7 +1,7 @@
 #ifndef USER_H
 #define USER_H
 
-#include "util.hpp"
+#include "util/util.hpp"
 
 #include <QDateTime>
 

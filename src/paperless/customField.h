@@ -2,7 +2,7 @@
 #define CUSTOMFIELD_H
 
 #include "qjsonobject.h"
-#include "util.hpp"
+#include "util/util.hpp"
 
 struct CustomField
 {

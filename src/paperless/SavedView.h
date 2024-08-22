@@ -1,7 +1,7 @@
 #ifndef SAVEDVIEW_H
 #define SAVEDVIEW_H
 
-#include "util.hpp"
+#include "util/util.hpp"
 
 struct FilterRule
 {

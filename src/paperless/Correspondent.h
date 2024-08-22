@@ -1,7 +1,7 @@
 #ifndef CORRESPONDENT_H
 #define CORRESPONDENT_H
 
-#include "util.hpp"
+#include "util/util.hpp"
 
 struct Correspondent
 {

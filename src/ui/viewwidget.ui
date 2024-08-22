@@ -28,27 +28,39 @@
      <number>0</number>
     </property>
     <item row="0" column="0">
-     <widget class="QStackedWidget" name="stackedWidget">
-      <widget class="QWidget" name="page_3">
-       <layout class="QGridLayout" name="gridLayout">
-        <property name="leftMargin">
-         <number>0</number>
-        </property>
-        <property name="topMargin">
-         <number>0</number>
-        </property>
-        <property name="rightMargin">
-         <number>0</number>
-        </property>
-        <property name="bottomMargin">
-         <number>0</number>
-        </property>
-        <item row="0" column="0">
-         <widget class="QTreeView" name="treeView"/>
-        </item>
-       </layout>
+     <widget class="QSplitter" name="splitter">
+      <property name="orientation">
+       <enum>Qt::Orientation::Horizontal</enum>
+      </property>
+      <widget class="QStackedWidget" name="stackedWidget">
+       <widget class="QWidget" name="page_3">
+        <layout class="QGridLayout" name="gridLayout">
+         <property name="leftMargin">
+          <number>0</number>
+         </property>
+         <property name="topMargin">
+          <number>0</number>
+         </property>
+         <property name="rightMargin">
+          <number>0</number>
+         </property>
+         <property name="bottomMargin">
+          <number>0</number>
+         </property>
+         <item row="0" column="0">
+          <widget class="QTreeView" name="treeView">
+           <property name="contextMenuPolicy">
+            <enum>Qt::ContextMenuPolicy::CustomContextMenu</enum>
+           </property>
+           <property name="selectionMode">
+            <enum>QAbstractItemView::SelectionMode::ExtendedSelection</enum>
+           </property>
+          </widget>
+         </item>
+        </layout>
+       </widget>
+       <widget class="QWidget" name="page_4"/>
       </widget>
-      <widget class="QWidget" name="page_4"/>
      </widget>
     </item>
    </layout>
@@ -68,6 +80,16 @@
     </property>
     <addaction name="actionSearch"/>
    </widget>
+   <widget class="QMenu" name="menuFile">
+    <property name="title">
+     <string>File</string>
+    </property>
+    <addaction name="actionExport_CSV"/>
+    <addaction name="actionPreview"/>
+    <addaction name="actionDownload"/>
+    <addaction name="actionBulk_Download"/>
+   </widget>
+   <addaction name="menuFile"/>
    <addaction name="menuSearch"/>
   </widget>
   <widget class="QStatusBar" name="statusbar"/>
@@ -119,6 +141,7 @@
    </attribute>
    <addaction name="actionPreview"/>
    <addaction name="actionDownload"/>
+   <addaction name="actionBulk_Download"/>
   </widget>
   <action name="actionPrevious_Page">
    <property name="text">
@@ -158,6 +181,22 @@
   <action name="actionDownload">
    <property name="text">
     <string>Download</string>
+   </property>
+   <property name="menuRole">
+    <enum>QAction::MenuRole::NoRole</enum>
+   </property>
+  </action>
+  <action name="actionBulk_Download">
+   <property name="text">
+    <string>Bulk Download</string>
+   </property>
+   <property name="menuRole">
+    <enum>QAction::MenuRole::NoRole</enum>
+   </property>
+  </action>
+  <action name="actionExport_CSV">
+   <property name="text">
+    <string>Export CSV</string>
    </property>
    <property name="menuRole">
     <enum>QAction::MenuRole::NoRole</enum>

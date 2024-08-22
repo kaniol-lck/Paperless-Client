@@ -47,7 +47,10 @@ public:
 
     QList<int> sectionList(const SavedView &view);
 
-    Document documentAt(const QModelIndex &index);
+    const Document &documentAt(const QModelIndex &index);
+    const Document &documentAt(int row);
+    QList<int> documentsAt(QList<QModelIndex> rows);
+    // QList<const Document *> documentsAt(QList<QModelIndex> rows);
 
     ReturnList<Document> &list();
 

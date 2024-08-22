@@ -2,7 +2,7 @@
 #define FILTERMENU_H
 
 #include "paperless/paperless.h"
-#include "unclosedmenu.h"
+#include "util/unclosedmenu.h"
 
 #define NEW_FILTER(Type, n) \
 static FilterMenu *new##Type##Filter(Paperless *client, QWidget *parent = nullptr){ \

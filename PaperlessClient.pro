@@ -8,53 +8,16 @@ CONFIG += c++17
 # In order to do so, uncomment the following line.
 #DEFINES += QT_DISABLE_DEPRECATED_BEFORE=0x060000    # disables all the APIs deprecated before Qt 6.0.0
 
-SOURCES += \
-    accountwindow.cpp \
-    client.cpp \
-    documentmodel.cpp \
-    filtermenu.cpp \
-    logindialog.cpp \
-    main.cpp \
-    pageswitcher.cpp \
-    paperless/paperless.cpp \
-    paperless/paperlessapi.cpp \
-    settingswindow.cpp \
-    unclosedmenu.cpp \
-    viewwidget.cpp \
-    windowselectorwidget.cpp
+INCLUDEPATH += $$PWD/src
 
+SOURCES += \
+    $$files(src/*.cpp, true)
 HEADERS += \
-    accountwindow.h \
-    client.h \
-    documentmodel.h \
-    filtermenu.h \
-    pageswitcher.h \
-    paperless/Correspondent.h \
-    paperless/Document.h \
-    logindialog.h \
-    paperless/DocumentType.h \
-    paperless/Group.h \
-    paperless/ReturnList.hpp \
-    paperless/SavedView.h \
-    paperless/StoragePath.h \
-    paperless/Tag.h \
-    paperless/customField.h \
-    paperless/paperless.h \
-    paperless/paperlessapi.h \
-    paperless/user.h \
-    reply.hpp \
-    settingswindow.h \
-    unclosedmenu.h \
-    util.hpp \
-    viewwidget.h \
-    windowselectorwidget.h
+    $$files(src/*.h, true) \
+    $$files(src/*.hpp, true)
 
 FORMS += \
-    accountwindow.ui \
-    client.ui \
-    logindialog.ui \
-    settingswindow.ui \
-    viewwidget.ui
+    $$files(src/*.ui, true)
 
 # Default rules for deployment.
 qnx: target.path = /tmp/$${TARGET}/bin

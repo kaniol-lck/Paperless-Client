@@ -98,7 +98,7 @@
   <customwidget>
    <class>WindowSelectorWidget</class>
    <extends>QTreeView</extends>
-   <header>windowselectorwidget.h</header>
+   <header>ui/windowselectorwidget.h</header>
   </customwidget>
  </customwidgets>
  <resources/>

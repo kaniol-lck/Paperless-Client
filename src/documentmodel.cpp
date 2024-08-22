@@ -139,10 +139,31 @@ QList<int> DocumentModel::sectionList(const SavedView &view)
     return list;
 }
 
-Document DocumentModel::documentAt(const QModelIndex &index)
+const Document &DocumentModel::documentAt(const QModelIndex &index)
 {
-    return list_.results.at(index.row());
+    return documentAt(index.row());
 }
+
+const Document &DocumentModel::documentAt(int row)
+{
+    return list_.results.at(row);
+}
+
+QList<int> DocumentModel::documentsAt(QList<QModelIndex> rows)
+{
+    QList<int> list;
+    for(auto &&row : rows)
+        list << documentAt(row.row()).id;
+    return list;
+}
+
+// QList<const Document*> DocumentModel::documentsAt(QList<QModelIndex> rows)
+// {
+//     QList<const Document*> list;
+//     for(auto &&row : rows)
+//         list << &documentAt(row.row());
+//     return list;
+// }
 
 ReturnList<Document> &DocumentModel::list()
 {

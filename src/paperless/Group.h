@@ -1,7 +1,7 @@
 #ifndef GROUP_H
 #define GROUP_H
 
-#include "util.hpp"
+#include "util/util.hpp"
 
 struct Group
 {

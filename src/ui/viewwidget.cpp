@@ -1,5 +1,7 @@
 #include "viewwidget.h"
+#include "bulkdownloaddialog.h"
 #include "ui_viewwidget.h"
+#include "exportcsvdialog.h"
 
 #include <QComboBox>
 #include <QDesktopServices>
@@ -23,6 +25,7 @@ ViewWidget::ViewWidget(QWidget *parent, Paperless *client, SavedView view) :
     model_(new DocumentModel(this, client))
 {
     ui->setupUi(this);
+    // ui->documentEdit->setClient(client_);
     ui->treeView->setModel(model_);
     setWindowTitle(view_.name);
 
@@ -148,9 +151,10 @@ void ViewWidget::setList(const ReturnList<Document> &list)
 
 void ViewWidget::on_treeView_doubleClicked(const QModelIndex &index)
 {
-    auto document = model_->documentAt(index);
-    auto url = client_->api()->documentPreviewUrl(document);
-    QDesktopServices::openUrl(url);
+    // auto dialog = new QDialog(this);
+    // auto document = model_->documentAt(index);
+    // auto url = client_->api()->documentPreviewUrl(document);
+    // QDesktopServices::openUrl(url);
 }
 
 void ViewWidget::on_actionPrevious_Page_triggered()
@@ -179,34 +183,54 @@ QToolButton *ViewWidget::filter2button(FilterMenu *filter)
 
 void ViewWidget::on_treeView_customContextMenuRequested(const QPoint &pos)
 {
-    if(selectedRow_ < 0) return;
+    if(selectedDocs_.isEmpty()) return;
     auto menu = new QMenu(this);
+    //TODO: multi
     menu->addAction(ui->actionPreview);
-    menu->addAction(ui->actionDownload);
-    menu->exec(ui->treeView->viewport()->mapFromGlobal(pos));
+    if(selectedDocs_.size() == 1)
+        menu->addAction(ui->actionDownload);
+    else
+        menu->addAction(ui->actionBulk_Download);
+    menu->exec(ui->treeView->viewport()->mapToGlobal(pos));
 }
 
 void ViewWidget::on_actionPreview_triggered()
 {
-    if(selectedRow_ < 0) return;
-    auto &&doc = model_->list().results.at(selectedRow_);
-    QDesktopServices::openUrl(client_->api()->documentPreviewUrl(doc));
+    if(selectedDocs_.isEmpty()) return;
+    for(auto doc : selectedDocs_)
+        QDesktopServices::openUrl(client_->api()->documentPreviewUrl(doc));
 }
 
 void ViewWidget::on_actionDownload_triggered()
 {
-    if(selectedRow_ < 0) return;
-    auto &&doc = model_->list().results.at(selectedRow_);
-    QDesktopServices::openUrl(client_->api()->documentDownloadUrl(doc));
+    if(selectedDocs_.isEmpty()) return;
+    if(selectedDocs_.size() == 1)
+        QDesktopServices::openUrl(client_->api()->documentDownloadUrl(selectedDocs_.first()));
 }
 
 void ViewWidget::onSelectedChanged()
 {
     auto indexes = ui->treeView->selectionModel()->selectedRows();
-    selectedRow_ = indexes.isEmpty()? -1 : indexes.first().row();
+    selectedDocs_ = model_->documentsAt(ui->treeView->selectionModel()->selectedRows());
+
     // some enable & disables
-    bool b = !indexes.isEmpty();
+    bool b = !selectedDocs_.isEmpty();
+    // ui->documentEdit->setVisible(selectedDocs_.size() == 1);
+        // ui->documentEdit->setDocument(selectedDocs_.first());
     ui->actionPreview->setEnabled(b);
-    ui->actionDownload->setEnabled(b);
+    ui->actionDownload->setEnabled(selectedDocs_.size() == 1);
+    ui->actionBulk_Download->setEnabled(b);
+}
+
+void ViewWidget::on_actionBulk_Download_triggered()
+{
+    auto dialog = new BulkDownloadDialog(client_, selectedDocs_, this);
+    dialog->show();
+}
+
+void ViewWidget::on_actionExport_CSV_triggered()
+{
+    auto dialog = new ExportCSVDialog(model_, view_, selectedDocs_, this);
+    dialog->show();
 }
 
