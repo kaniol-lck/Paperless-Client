@@ -1,7 +1,7 @@
 #ifndef DOCUMENTEDIT_H
 #define DOCUMENTEDIT_H
 
-#include <QWidget>
+#include <QDialog>
 
 #include "paperless/Document.h"
 #include "util/reply.hpp"
@@ -10,7 +10,7 @@ namespace Ui {
 class DocumentEdit;
 }
 class Paperless;
-class DocumentEdit : public QWidget
+class DocumentEdit : public QDialog
 {
     Q_OBJECT
 
@@ -38,7 +38,7 @@ private slots:
 private:
     Ui::DocumentEdit *ui;
     Paperless *client_;
-    int documentId_;
+    Document document_;
 
     QList<std::shared_ptr<Reply<bool>>> replies;
 };

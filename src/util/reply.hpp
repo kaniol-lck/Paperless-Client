@@ -84,6 +84,7 @@ public:
         QObject::connect(reply_, &QNetworkReply::finished, object, [=, reply = reply_, resultInterpreter = resultInterpreter_, runBackground = runBackground_]{
             if(reply->error() != QNetworkReply::NoError) {
                 qDebug() << reply->errorString();
+                // qDebug() << reply->readAll();
                 if(errorHandler) errorHandler(reply->error());
             } else
                 std::apply(callback, resultInterpreter(reply));

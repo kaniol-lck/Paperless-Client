@@ -1,15 +1,23 @@
 #include "exportcsvdialog.h"
+#include "documentmodel.h"
 #include "ui_exportcsvdialog.h"
 
-ExportCSVDialog::ExportCSVDialog(DocumentModel *model, SavedView view, QList<int> docs, QWidget *parent):
+#include <QFile>
+
+ExportCSVDialog::ExportCSVDialog(DocumentModel *model, SavedView view, QModelIndexList docIndexes, QWidget *parent):
     QDialog(parent),
     ui(new Ui::ExportCSVDialog),
     model_(model),
     view_(view),
-    docs_(docs)
+    docIndexes_(docIndexes)
 {
     ui->setupUi(this);
-    // for(auto )
+    for(auto i : model_->sectionList(view_)){
+        auto item = new QListWidgetItem(model_->headerData(i, Qt::Horizontal).toString());
+        item->setData(Qt::UserRole, i);
+        item->setCheckState(Qt::Checked);
+        ui->exportFields->addItem(item);
+    }
 }
 
 ExportCSVDialog::~ExportCSVDialog()
@@ -19,5 +27,27 @@ ExportCSVDialog::~ExportCSVDialog()
 
 void ExportCSVDialog::on_buttonBox_accepted()
 {
-
+    QFile file("1.csv");
+    file.open(QIODevice::WriteOnly);
+    QTextStream stream(&file);
+    QList<int> list;
+    QStringList headerList;
+    headerList << "id";
+    for(int row = 0; row < ui->exportFields->count(); row++){
+        auto item = ui->exportFields->item(row);
+        if(item->checkState() == Qt::Unchecked) continue;
+        int i = item->data(Qt::UserRole).toInt();
+        list << i;
+        headerList << '"' + model_->headerData(i, Qt::Horizontal).toString() + '"';
+    }
+    stream << headerList.join(",") << Qt::endl;
+    for(auto index : docIndexes_){
+        auto doc = model_->documentAt(index);
+        QStringList strList;
+        strList << QString::number(doc.id);
+        for(auto i : list){
+            strList << '"' + model_->data(model_->index(index.row(), i)).toString() + '"';
+        }
+        stream << strList.join(",") << Qt::endl;
+    }
 }

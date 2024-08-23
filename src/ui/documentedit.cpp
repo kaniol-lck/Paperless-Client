@@ -4,7 +4,7 @@
 #include "paperless/paperless.h"
 
 DocumentEdit::DocumentEdit(QWidget *parent):
-    QWidget(parent),
+    QDialog(parent),
     ui(new Ui::DocumentEdit)
 {
     ui->setupUi(this);
@@ -17,7 +17,7 @@ DocumentEdit::~DocumentEdit()
 
 void DocumentEdit::setDocument(const Document &document)
 {
-    documentId_ = document.id;
+    document_ = document;
     ui->correspondentSelect->setCurrentText(client_->getCorrespondentName(document.correspondent));
     ui->documentTypeSelect->setCurrentText(client_->getDocumentTypeName(document.document_type));
     ui->storagePathSelect->setCurrentText(client_->getStoragePathName(document.storage_path));
@@ -57,22 +57,13 @@ void DocumentEdit::setClient(Paperless *newClient)
 
 void DocumentEdit::save()
 {
-    auto &&edit = client_->api()->bulkEdit;
-    std::shared_ptr<Reply<bool>> reply;
-    reply = edit.set_correspondent({documentId_}, ui->correspondentSelect->currentData().toInt()).asShared();
-    replies << reply;
-    reply->setOnFinished(this, [this, reply](bool b){
-        replies.removeOne(reply);
-        emit documentUpdated();
-    });
-    reply = edit.set_document_type({documentId_}, ui->documentTypeSelect->currentData().toInt()).asShared();
-    replies << reply;
-    reply->setOnFinished(this, [this](bool b){
-        emit documentUpdated();
-    });
-    reply = edit.set_storage_path({documentId_}, ui->storagePathSelect->currentData().toInt()).asShared();
-    replies << reply;
-    reply->setOnFinished(this, [this](bool b){
+    Document docNew = document_;
+    docNew.correspondent = ui->correspondentSelect->currentData().toInt();
+    docNew.document_type = ui->documentTypeSelect->currentData().toInt();
+    docNew.storage_path = ui->storagePathSelect->currentData().toInt();
+
+    client_->api()->putDocument(document_.id, docNew, document_).setOnFinished(this, [this](auto){
+        qDebug() << "finished";
         emit documentUpdated();
     });
 }

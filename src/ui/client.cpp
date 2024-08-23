@@ -17,7 +17,7 @@ Client::Client(QWidget *parent) :
     ui->setupUi(this);
     setStyleSheet(R"(
 QTreeView::item {
-  min-height: 28px;
+  min-height: 34px;
 })");
 
     auto downloader = new CurlDownloader(this);

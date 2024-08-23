@@ -97,6 +97,20 @@ Reply<bool> PaperlessApi::login(const QUrl &url, const QString &username, const 
     };
 }
 
+Reply<bool> PaperlessApi::putDocument(int id, const Document &docNew, const Document &docOld)
+{
+    auto obj = docNew.toJsonNew(docOld);
+    auto data = QJsonDocument(obj).toJson(QJsonDocument::Compact);
+    qDebug() << data;
+    auto request = api_.createRequest(documents + QString("%1/").arg(id));
+    return { manager_.put(request, data), [](auto r){
+            QRestReply reply(r);
+            // qDebug() << reply.readJson();
+            return true;
+        }
+    };
+}
+
 Reply<bool> PaperlessApi::postBulkEdit(const QList<int> &documents, const QString &method, const QJsonObject &args)
 {
     QJsonObject obj;

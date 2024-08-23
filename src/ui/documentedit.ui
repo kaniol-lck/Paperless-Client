@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
  <class>DocumentEdit</class>
- <widget class="QWidget" name="DocumentEdit">
+ <widget class="QDialog" name="DocumentEdit">
   <property name="geometry">
    <rect>
     <x>0</x>

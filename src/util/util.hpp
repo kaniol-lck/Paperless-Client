@@ -28,6 +28,27 @@ for(auto &&v : ::value(c, #attr).toList()){ \
     obj.attr << Type::fromVariant(v); \
 }
 
+#define put_attr(obj, attr) \
+obj.insert(#attr, attr);
+
+#define if_put_attr(doc, obj, attr) \
+if(attr != doc.attr) obj.insert(#attr, attr);
+
+#define put_attr_n(obj, attr) \
+obj.insert(#attr, attr.toString());
+
+#define put_attr_intlist(obj, attr) \
+QJsonArray attr##arr; \
+for(auto i : attr) arr.append(i); \
+obj.insert(#attr, attr##arr); \
+
+#define put_attr_list(obj, attr) \
+if(!attr.isEmpty()){ \
+    QJsonArray arr; \
+    for(auto &&i : attr) arr.append(i.toJson()); \
+    obj.insert(#attr, arr); \
+}
+
 template<typename Container>
 inline bool contains(const Container& c, const QString& s)
 {

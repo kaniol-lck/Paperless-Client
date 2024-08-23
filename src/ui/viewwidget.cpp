@@ -1,7 +1,7 @@
 #include "viewwidget.h"
 #include "bulkdownloaddialog.h"
+#include "ui/documentedit.h"
 #include "ui_viewwidget.h"
-#include "exportcsvdialog.h"
 
 #include <QComboBox>
 #include <QDesktopServices>
@@ -12,6 +12,7 @@
 #include "paperless/paperless.h"
 #include "paperless/paperlessapi.h"
 #include "filtermenu.h"
+#include "exportcsvdialog.h"
 
 ViewWidget::ViewWidget(QWidget *parent, Paperless *client, SavedView view) :
     QMainWindow(parent),
@@ -152,7 +153,12 @@ void ViewWidget::setList(const ReturnList<Document> &list)
 void ViewWidget::on_treeView_doubleClicked(const QModelIndex &index)
 {
     // auto dialog = new QDialog(this);
-    // auto document = model_->documentAt(index);
+    auto document = model_->documentAt(index);
+    auto edit = new DocumentEdit(this);
+    edit->setClient(client_);
+    edit->setDocument(document);
+    edit->show();
+    // qDebug() << document.toJson();
     // auto url = client_->api()->documentPreviewUrl(document);
     // QDesktopServices::openUrl(url);
 }
@@ -230,7 +236,9 @@ void ViewWidget::on_actionBulk_Download_triggered()
 
 void ViewWidget::on_actionExport_CSV_triggered()
 {
-    auto dialog = new ExportCSVDialog(model_, view_, selectedDocs_, this);
+    auto indexes = ui->treeView->selectionModel()->selectedRows();
+
+    auto dialog = new ExportCSVDialog(model_, view_, ui->treeView->selectionModel()->selectedRows(), this);
     dialog->show();
 }
 

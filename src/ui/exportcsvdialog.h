@@ -1,6 +1,7 @@
 #ifndef EXPORTCSVDIALOG_H
 #define EXPORTCSVDIALOG_H
 
+#include <QModelIndexList>
 #include <QDialog>
 
 #include "paperless/SavedView.h"
@@ -14,7 +15,7 @@ class ExportCSVDialog : public QDialog
     Q_OBJECT
 
 public:
-    explicit ExportCSVDialog(DocumentModel *model, SavedView view, QList<int> docs, QWidget *parent = nullptr);
+    explicit ExportCSVDialog(DocumentModel *model, SavedView view, QModelIndexList docIndexes, QWidget *parent = nullptr);
     ~ExportCSVDialog();
 
 private slots:
@@ -24,7 +25,7 @@ private:
     Ui::ExportCSVDialog *ui;
     DocumentModel *model_;
     SavedView view_;
-    QList<int> docs_;
+    QModelIndexList docIndexes_;
 };
 
 #endif // EXPORTCSVDIALOG_H

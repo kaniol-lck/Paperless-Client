@@ -89,7 +89,7 @@ public:
 
     Reply<bool> login(const QUrl &url, const QString &username, const QString &password);
 
-
+    Reply<bool> putDocument(int id, const Document &docNew, const Document &docOld);
 
 signals:
     void tokenChanged();
