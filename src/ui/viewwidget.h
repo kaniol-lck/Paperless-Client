@@ -40,10 +40,12 @@ private slots:
     void on_actionPreview_triggered();
     void on_actionDownload_triggered();
     void onSelectedChanged();
-
     void on_actionBulk_Download_triggered();
-
     void on_actionExport_CSV_triggered();
+    void on_actionImport_CSV_triggered();
+    void on_actionEdit_Mode_toggled(bool arg1);
+
+    // void on_tableView_clicked(const QModelIndex &index);
 
 private:
     Ui::ViewWidget *ui;
@@ -59,6 +61,10 @@ private:
     QList<int> selectedDocs_;
 
     QToolButton *filter2button(FilterMenu *filter);
+
+    // QWidget interface
+protected:
+    void paintEvent(QPaintEvent *event) override;
 };
 
 #endif // VIEWWIDGET_H

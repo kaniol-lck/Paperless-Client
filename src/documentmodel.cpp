@@ -37,6 +37,7 @@ QVariant DocumentModel::data(const QModelIndex &index, int role) const
     switch (role) {
     case Qt::ToolTipRole:
     case Qt::DisplayRole:
+    case Qt::EditRole:
         switch (index.column())
         {
         case IdColumn:
@@ -45,7 +46,7 @@ QVariant DocumentModel::data(const QModelIndex &index, int role) const
             return client_->getCorrespondentName(document.correspondent);
         case DocumentTypeColumn:
             return client_->getDocumentTypeName(document.document_type);
-        case Storage_pathColumn:
+        case StoragePathColumn:
             return client_->getStoragePathName(document.storage_path);
         case TitleColumn:
             return document.title;
@@ -59,7 +60,7 @@ QVariant DocumentModel::data(const QModelIndex &index, int role) const
         }
         case CreatedColumn:
             return document.created;
-        case Created_dateColumn:
+        case CreatedDateColumn:
             return document.created_date;
         case ModifiedColumn:
             return document.modified;
@@ -93,7 +94,76 @@ QVariant DocumentModel::data(const QModelIndex &index, int role) const
             }
         }
     }
-    return {};
+    return QVariant();
+}
+
+bool DocumentModel::setData(const QModelIndex &index, const QVariant &value, int role)
+{
+    qDebug() << index << value << role;
+
+    //reference
+    auto &doc = list_.results[index.row()];
+    auto docOld = doc;
+
+    switch (index.column()) {
+    case IdColumn:
+        return false;
+    case CorrespondentColumn:
+        doc.correspondent = value.toInt();
+        break;
+    case DocumentTypeColumn:
+        doc.document_type = value.toInt();
+        break;
+    case StoragePathColumn:
+        doc.storage_path = value.toInt();
+        break;
+    case TitleColumn:
+        doc.title = value.toString();
+        break;
+    case ContentColumn:
+        return false;
+    case TagsColumn:{
+        // QStringList strList;
+        // for(auto id : document.tags)
+        //     strList << client_->getTagName(id);
+        // return strList.join(", ");
+        break;
+    }
+    case CreatedColumn:
+    case CreatedDateColumn:
+    case ModifiedColumn:
+    case AddedColumn:
+    case DeletedAtColumn:
+        return false;
+    case ArchiveSerialNumberColumn:
+        doc.archive_serial_number = value.toInt();
+        break;
+    case OriginalFileNameColumn:
+    case ArchivedFileNameColumn:
+        return false;
+    case OwnerColumn:
+        doc.owner = value.toInt();
+        break;
+    case UserCanChangeColumn:
+    case IsSharedByRequesterColumn:
+    case NotesColumn:
+        return false;
+    default:
+        // case CustomFieldsColumn:
+        auto i = index.column() - CustomFieldsColumn;
+        auto l = customFieldList();
+        if(i >= 0 && i < l.size()){
+            auto id = l.at(i);
+            for(auto &field : doc.custom_fields)
+                if(field.field == id){
+                    field.value = value.toString();
+                    break;
+                }
+        }
+    }
+    //TODO: not changed;
+    client_->api()->putDocument(doc.id, doc, docOld);
+    return true;
 }
 
 void DocumentModel::setList(const ReturnList<Document> &newList)
@@ -186,7 +256,7 @@ QVariant DocumentModel::headerData(int section, Qt::Orientation orientation, int
             return tr("correspondent");
         case DocumentTypeColumn:
             return tr("document_type");
-        case Storage_pathColumn:
+        case StoragePathColumn:
             return tr("storage_path");
         case TitleColumn:
             return tr("title");
@@ -196,7 +266,7 @@ QVariant DocumentModel::headerData(int section, Qt::Orientation orientation, int
             return tr("tags");
         case CreatedColumn:
             return tr("created");
-        case Created_dateColumn:
+        case CreatedDateColumn:
             return tr("created_date");
         case ModifiedColumn:
             return tr("modified");
@@ -229,4 +299,26 @@ QVariant DocumentModel::headerData(int section, Qt::Orientation orientation, int
         }
     }
     return {};
+}
+
+Qt::ItemFlags DocumentModel::flags(const QModelIndex &index) const
+{
+    static QList<int> uneditable = {
+        IdColumn,
+        ContentColumn,
+        CreatedColumn,
+        CreatedDateColumn,
+        ModifiedColumn,
+        AddedColumn,
+        DeletedAtColumn,
+        OriginalFileNameColumn,
+        ArchivedFileNameColumn,
+        UserCanChangeColumn,
+        IsSharedByRequesterColumn,
+        NotesColumn
+    };
+    if(uneditable.contains(index.column()))
+        return QAbstractTableModel::flags(index);
+    else
+        return QAbstractTableModel::flags(index) | Qt::ItemIsEditable;
 }

@@ -1,10 +1,12 @@
 #include "viewwidget.h"
 #include "bulkdownloaddialog.h"
 #include "ui/documentedit.h"
+#include "ui/importcsvdialog.h"
 #include "ui_viewwidget.h"
 
 #include <QComboBox>
 #include <QDesktopServices>
+#include <QFileDialog>
 #include <QLineEdit>
 #include <QToolButton>
 
@@ -28,6 +30,7 @@ ViewWidget::ViewWidget(QWidget *parent, Paperless *client, SavedView view) :
     ui->setupUi(this);
     // ui->documentEdit->setClient(client_);
     ui->treeView->setModel(model_);
+    ui->tableView->setModel(model_);
     setWindowTitle(view_.name);
 
     connect(ui->treeView->selectionModel(), &QItemSelectionModel::selectionChanged, this, &ViewWidget::onSelectedChanged);
@@ -116,17 +119,19 @@ SavedView ViewWidget::view() const
 void ViewWidget::updateSections()
 {
     auto list = model_->sectionList(view_);
-    auto &&header = ui->treeView->header();
-    if(!list.isEmpty()){
-        ui->treeView->header()->blockSignals(true);
-        header->clearSelection();
-        for(int i = 0; i < header->count(); i++){
-            if(i < list.size())
-                header->moveSection(header->visualIndex(list.at(i)), i);
-            else
-                header->setSectionHidden(header->logicalIndex(i), true);
+    for(auto &&header : { ui->treeView->header(),
+                          ui->tableView->horizontalHeader()}){
+        if(!list.isEmpty()){
+            header->blockSignals(true);
+            header->clearSelection();
+            for(int i = 0; i < header->count(); i++){
+                if(i < list.size())
+                    header->moveSection(header->visualIndex(list.at(i)), i);
+                else
+                    header->setSectionHidden(header->logicalIndex(i), true);
+            }
+            header->blockSignals(false);
         }
-        ui->treeView->header()->blockSignals(false);
     }
 }
 
@@ -242,3 +247,55 @@ void ViewWidget::on_actionExport_CSV_triggered()
     dialog->show();
 }
 
+void ViewWidget::on_actionImport_CSV_triggered()
+{
+    auto fileName = QFileDialog::getOpenFileName(this, tr("Select CSV file"), "", "*.csv");
+    if(fileName.isEmpty()) return;
+    auto dialog = new ImportCSVDialog(this, fileName);
+    dialog->show();
+}
+
+
+void ViewWidget::on_actionEdit_Mode_toggled(bool arg1)
+{
+    ui->stackedWidget->setCurrentIndex(arg1? 1 : 0);
+}
+
+#define INDEX_WIDGET(Type, n) \
+auto n##_index = model_->index(row, DocumentModel::Type##Column); \
+if(show){ \
+    if(ui->tableView->indexWidget(n##_index)) continue; \
+    auto n##_cbbox = new QComboBox(this); \
+    for(auto &n : client_->n##List()) \
+        n##_cbbox->addItem(n.name, n.id); \
+    n##_cbbox->setCurrentText(client_->get##Type##Name(doc.n)); \
+    connect(n##_cbbox, &QComboBox::currentIndexChanged, this, [=]{ \
+        model_->setData(n##_index, n##_cbbox->currentData(), Qt::EditRole); \
+    }); \
+    ui->tableView->setIndexWidget(n##_index, n##_cbbox); \
+} else if(auto widget = ui->tableView->indexWidget(n##_index)){ \
+    ui->tableView->setIndexWidget(n##_index, nullptr); \
+    delete widget; \
+}
+
+void ViewWidget::paintEvent(QPaintEvent *event)
+{
+    auto beginRow = ui->tableView->indexAt(QPoint(0, 0)).row();
+    if(beginRow < 0) return;
+    auto endRow = ui->tableView->indexAt(QPoint(0, ui->tableView->height())).row();
+    if(endRow < 0)
+        endRow = model_->rowCount() - 1;
+    else
+        //extra 2
+        endRow += 2;
+    for(int row = 0; row < model_->rowCount(); row++){
+        bool show = row >= beginRow && row <= endRow;
+        auto doc = model_->documentAt(row);
+        INDEX_WIDGET(Correspondent, correspondent);
+        INDEX_WIDGET(DocumentType, document_type);
+        INDEX_WIDGET(StoragePath, storage_path);
+        // INDEX_WIDGET(Owner, user);
+    }
+}
+
+#undef INDEX_WIDGET

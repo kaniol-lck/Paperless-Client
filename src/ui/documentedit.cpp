@@ -33,14 +33,14 @@ void DocumentEdit::updateCorrespondentList()
 void DocumentEdit::updateDocTypeList()
 {
     ui->documentTypeSelect->clear();
-    for(auto &i : client_->docTypeList())
+    for(auto &i : client_->document_typeList())
         ui->documentTypeSelect->addItem(i.name, i.id);
 }
 
 void DocumentEdit::updatePathList()
 {
     ui->storagePathSelect->clear();
-    for(auto &i : client_->pathList())
+    for(auto &i : client_->storage_pathList())
         ui->storagePathSelect->addItem(i.name, i.id);
 }
 
@@ -48,8 +48,8 @@ void DocumentEdit::setClient(Paperless *newClient)
 {
     client_ = newClient;
     connect(client_, &Paperless::correspondentListUpdated, this, &DocumentEdit::updateCorrespondentList);
-    connect(client_, &Paperless::docTypeListUpdated, this, &DocumentEdit::updateDocTypeList);
-    connect(client_, &Paperless::pathListUpdated, this, &DocumentEdit::updatePathList);
+    connect(client_, &Paperless::document_typeListUpdated, this, &DocumentEdit::updateDocTypeList);
+    connect(client_, &Paperless::storage_pathListUpdated, this, &DocumentEdit::updatePathList);
     updateCorrespondentList();
     updateDocTypeList();
     updatePathList();

@@ -50,10 +50,10 @@ public:
     }
 
     ID2NAME(Correspondent, correspondent);
-    ID2NAME(DocumentType, docType);
-    ID2NAME(SavedView, view);
-    ID2NAME(CustomField, field);
-    ID2NAME(StoragePath, path);
+    ID2NAME(DocumentType, document_type);
+    ID2NAME(SavedView, saved_view);
+    ID2NAME(CustomField, custom_field);
+    ID2NAME(StoragePath, storage_path);
     ID2NAME(Tag, tag);
     QString getUserName(int id) const{
             for(auto &&v : userList_)
@@ -66,11 +66,11 @@ public:
 
 signals:
     DEFINE_LIST_S(Correspondent, correspondent);
-    DEFINE_LIST_S(Document, doc);
-    DEFINE_LIST_S(DocumentType, docType);
-    DEFINE_LIST_S(SavedView, view);
-    DEFINE_LIST_S(CustomField, field);
-    DEFINE_LIST_S(StoragePath, path);
+    DEFINE_LIST_S(Document, document);
+    DEFINE_LIST_S(DocumentType, document_type);
+    DEFINE_LIST_S(SavedView, saved_view);
+    DEFINE_LIST_S(CustomField, custom_field);
+    DEFINE_LIST_S(StoragePath, storage_path);
     DEFINE_LIST_S(Tag, tag);
     DEFINE_LIST_S(User, user);
     DEFINE_LIST_S(Group, group);
@@ -79,11 +79,11 @@ private:
     PaperlessApi *api_;
 
     DEFINE_LIST(Correspondent, correspondent);
-    DEFINE_LIST(Document, doc);
-    DEFINE_LIST(DocumentType, docType);
-    DEFINE_LIST(SavedView, view);
-    DEFINE_LIST(CustomField, field);
-    DEFINE_LIST(StoragePath, path);
+    DEFINE_LIST(Document, document);
+    DEFINE_LIST(DocumentType, document_type);
+    DEFINE_LIST(SavedView, saved_view);
+    DEFINE_LIST(CustomField, custom_field);
+    DEFINE_LIST(StoragePath, storage_path);
     DEFINE_LIST(Tag, tag);
     DEFINE_LIST(User, user);
     DEFINE_LIST(Group, group);

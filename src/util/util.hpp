@@ -15,6 +15,12 @@ inline QVariant value(const Container& c, const QString& s, const list&... Args)
     return value(c.toMap().value(s), Args...);
 }
 
+template<typename Container>
+inline bool contains(const Container& c, const QString& s)
+{
+    return c.toMap().contains(s);
+}
+
 #define set_attr(obj, c, attr, Type) \
 obj.attr = ::value(c, #attr).to##Type();
 
@@ -47,12 +53,6 @@ if(!attr.isEmpty()){ \
     QJsonArray arr; \
     for(auto &&i : attr) arr.append(i.toJson()); \
     obj.insert(#attr, arr); \
-}
-
-template<typename Container>
-inline bool contains(const Container& c, const QString& s)
-{
-    return c.toMap().contains(s);
 }
 
 #endif // UTIL_HPP

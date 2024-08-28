@@ -21,9 +21,9 @@ public:
     explicit FilterMenu(const QString &name, QWidget *parent = nullptr);
 
     NEW_FILTER(Correspondent, correspondent);
-    NEW_FILTER(DocumentType, docType);
-    NEW_FILTER(CustomField, field);
-    NEW_FILTER(StoragePath, path);
+    NEW_FILTER(DocumentType, document_type);
+    NEW_FILTER(CustomField, custom_field);
+    NEW_FILTER(StoragePath, storage_path);
     NEW_FILTER(Tag, tag);
     NEW_FILTER(User, user);
 

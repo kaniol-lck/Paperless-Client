@@ -20,7 +20,7 @@ PageSwitcher::PageSwitcher(QWidget *parent, Paperless *client) :
         item->setFlags(item->flags().setFlag(Qt::ItemIsSelectable, false));
     };
     //    setViewMode(QMdiArea::TabbedView);
-    connect(client, &Paperless::viewListUpdated, this, &PageSwitcher::syncViewList);
+    connect(client, &Paperless::saved_viewListUpdated, this, &PageSwitcher::syncViewList);
 }
 
 void PageSwitcher::nextPage()
@@ -128,7 +128,7 @@ void PageSwitcher::syncViewList()
         selectedViewWidget = viewWidget(currentPage);
 
     auto oldCount = model_.item(View)->rowCount();
-    auto viewList = client_->viewList();
+    auto viewList = client_->saved_viewList();
     for(const auto &view : viewList){
         if(!view.show_in_sidebar) continue;
         if(auto i = findViewWidget(view); i < 0){

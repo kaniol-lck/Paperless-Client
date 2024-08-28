@@ -1,8 +1,12 @@
 #include "exportcsvdialog.h"
 #include "documentmodel.h"
 #include "ui_exportcsvdialog.h"
+#include "util/util.h"
 
 #include <QFile>
+#include <QFileDialog>
+#include <QMessageBox>
+#include <QPushButton>
 
 ExportCSVDialog::ExportCSVDialog(DocumentModel *model, SavedView view, QModelIndexList docIndexes, QWidget *parent):
     QDialog(parent),
@@ -27,8 +31,12 @@ ExportCSVDialog::~ExportCSVDialog()
 
 void ExportCSVDialog::on_buttonBox_accepted()
 {
-    QFile file("1.csv");
-    file.open(QIODevice::WriteOnly);
+    auto savePath = QFileDialog::getSaveFileName(this, tr("Save CSV"), "", "*.csv");
+    QFile file(savePath);
+    if(!file.open(QIODevice::WriteOnly)){
+        QMessageBox::warning(this, tr("Failed Save"), tr("Can not write to file."));
+        return;
+    }
     QTextStream stream(&file);
     QList<int> list;
     QStringList headerList;
@@ -50,4 +58,5 @@ void ExportCSVDialog::on_buttonBox_accepted()
         }
         stream << strList.join(",") << Qt::endl;
     }
+    openFileInFolder(savePath);
 }

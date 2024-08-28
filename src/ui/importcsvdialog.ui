@@ -1,13 +1,13 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
- <class>ExportCSVDialog</class>
- <widget class="QDialog" name="ExportCSVDialog">
+ <class>ImportCSVDialog</class>
+ <widget class="QDialog" name="ImportCSVDialog">
   <property name="geometry">
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>655</width>
-    <height>438</height>
+    <width>635</width>
+    <height>450</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -15,7 +15,7 @@
   </property>
   <layout class="QVBoxLayout" name="verticalLayout">
    <item>
-    <widget class="QListWidget" name="exportFields"/>
+    <widget class="QTreeView" name="treeView"/>
    </item>
    <item>
     <widget class="QDialogButtonBox" name="buttonBox">
@@ -34,7 +34,7 @@
   <connection>
    <sender>buttonBox</sender>
    <signal>accepted()</signal>
-   <receiver>ExportCSVDialog</receiver>
+   <receiver>ImportCSVDialog</receiver>
    <slot>accept()</slot>
    <hints>
     <hint type="sourcelabel">
@@ -50,7 +50,7 @@
   <connection>
    <sender>buttonBox</sender>
    <signal>rejected()</signal>
-   <receiver>ExportCSVDialog</receiver>
+   <receiver>ImportCSVDialog</receiver>
    <slot>reject()</slot>
    <hints>
     <hint type="sourcelabel">
