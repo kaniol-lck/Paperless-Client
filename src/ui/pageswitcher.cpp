@@ -161,7 +161,7 @@ void PageSwitcher::syncViewList()
         }
     }
     //fallback
-    // setPage(Main, 0);
+    setPage(Main, 0);
 }
 
 void PageSwitcher::addWindow(QMainWindow *window, WindowCategory category)

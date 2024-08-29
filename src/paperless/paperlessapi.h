@@ -8,6 +8,7 @@
 
 #include "paperless/Correspondent.h"
 #include "paperless/Group.h"
+#include "paperless/UiSettings.h"
 #include "paperless/user.h"
 #include "util/reply.hpp"
 #include "ReturnList.hpp"
@@ -83,6 +84,8 @@ public:
     QUrl documentDownloadUrl(const Document &document);
     QUrl documentPreviewUrl(const Document &document);
     QUrl documentThumbUrl(const Document &document);
+    QUrl appLogoUrl(const UiSettings &uiSettings);
+    Reply<QPixmap> getAppLogo(const UiSettings &uiSettings);
     Reply<QPixmap> getDocumentThumb(const Document &document);
 
     void setUrl(const QUrl &newUrl);
@@ -90,6 +93,8 @@ public:
     Reply<bool> login(const QUrl &url, const QString &username, const QString &password);
 
     Reply<bool> putDocument(int id, const Document &docNew, const Document &docOld);
+
+    Reply<UiSettings> getUiSettings();
 
 signals:
     void tokenChanged();
@@ -120,6 +125,7 @@ private:
     DEFINE_ENDPOINT(workflows)
     DEFINE_ENDPOINT(custom_fields)
     DEFINE_ENDPOINT(config)
+    DEFINE_ENDPOINT(ui_settings)
 
     static constexpr auto bulk_edit = "/api/documents/bulk_edit/";
     static constexpr auto bulk_download = "/api/documents/bulk_download/";

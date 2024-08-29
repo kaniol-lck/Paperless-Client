@@ -99,8 +99,6 @@ QVariant DocumentModel::data(const QModelIndex &index, int role) const
 
 bool DocumentModel::setData(const QModelIndex &index, const QVariant &value, int role)
 {
-    qDebug() << index << value << role;
-
     //reference
     auto &doc = list_.results[index.row()];
     auto docOld = doc;

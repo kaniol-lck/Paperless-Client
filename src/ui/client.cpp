@@ -1,12 +1,13 @@
 #include "client.h"
-#include "accountwindow.h"
-#include "util/curldownloader.h"
-#include "settingswindow.h"
 #include "ui_client.h"
 
+#include "accountwindow.h"
+#include "settingswindow.h"
 #include "logindialog.h"
 #include "viewwidget.h"
 #include "pageswitcher.h"
+
+#include <QSplitter>
 
 Client::Client(QWidget *parent) :
     QMainWindow(parent),
@@ -20,7 +21,7 @@ QTreeView::item {
   min-height: 34px;
 })");
 
-    auto downloader = new CurlDownloader(this);
+    // auto downloader = new CurlDownloader(this);
 
     menuBar_ = new QMenuBar(this);
     menuBar_->hide();
@@ -29,7 +30,12 @@ QTreeView::item {
         menu->addActions(menuAction->menu()->actions());
     }
 
-    setCentralWidget(pageSwitcher_);
+    auto splitter = new QSplitter(this);
+    splitter->addWidget(ui->pageTreeView);
+    splitter->addWidget(pageSwitcher_);
+    setCentralWidget(splitter);
+
+    // setCentralWidget(pageSwitcher_);
     ui->pageTreeView->setModel(pageSwitcher_->model());
 
     connect(ui->pageTreeView, &WindowSelectorWidget::windowChanged, pageSwitcher_, &PageSwitcher::setPage);
@@ -44,6 +50,14 @@ QTreeView::item {
     pageSwitcher_->addSettingsWindow(new SettingsWindow(this));
 
     client_->updateAllList();
+
+    connect(client_, &Paperless::appLogoUpdated, this, [this]{
+        setWindowIcon(client_->appLogo());
+    });
+    connect(client_, &Paperless::uiSettingsUpdated, this, [this]{
+        setWindowTitle(client_->appTitle());
+    });
+    client_->updateUiSettings();
 
     mergeMenuBar();
 }

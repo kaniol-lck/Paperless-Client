@@ -7,6 +7,7 @@
 #include "paperless/SavedView.h"
 #include "paperless/StoragePath.h"
 #include "paperless/paperlessapi.h"
+#include "qicon.h"
 
 #define DEFINE_LIST(Type, name) \
 public: QList<Type> name##List() const { return name##List_; } \
@@ -64,6 +65,13 @@ public:
 
     PaperlessApi *api() const;
 
+    void updateUiSettings();
+
+    UiSettings uiSettings() const;
+
+    QIcon appLogo() const;
+    QString appTitle() const;
+
 signals:
     DEFINE_LIST_S(Correspondent, correspondent);
     DEFINE_LIST_S(Document, document);
@@ -75,8 +83,13 @@ signals:
     DEFINE_LIST_S(User, user);
     DEFINE_LIST_S(Group, group);
 
+    void uiSettingsUpdated();
+    void appLogoUpdated();
+
 private:
     PaperlessApi *api_;
+    UiSettings uiSettings_;
+    QIcon appLogo_;
 
     DEFINE_LIST(Correspondent, correspondent);
     DEFINE_LIST(Document, document);

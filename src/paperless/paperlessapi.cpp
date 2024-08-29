@@ -53,11 +53,31 @@ QUrl PaperlessApi::documentThumbUrl(const Document &document)
     return documentThumbUrl(document.id);
 }
 
+QUrl PaperlessApi::appLogoUrl(const UiSettings &uiSettings)
+{
+    auto path = value(uiSettings.settings, "app_logo").toString();
+    return api_.createRequest(path).url();
+}
+
+Reply<QPixmap> PaperlessApi::getAppLogo(const UiSettings &uiSettings)
+{
+    auto path = value(uiSettings.settings, "app_logo").toString();
+    auto request = api_.createRequest(path);
+    return { manager_.get(request), [](auto r){
+                QPixmap pixmap;
+                pixmap.loadFromData(r->readAll());
+                return pixmap;
+            }
+    };
+}
+
 Reply<QPixmap> PaperlessApi::getDocumentThumb(const Document &document)
 {
     auto request = api_.createRequest(QString("/api/documents/%1/thumb/").arg(document.id));
     return { manager_.get(request), [](auto r){
-                return QPixmap(r->readAll());
+                QPixmap pixmap;
+                pixmap.loadFromData(r->readAll());
+                return pixmap;
             }
     };
 }
@@ -104,10 +124,24 @@ Reply<bool> PaperlessApi::putDocument(int id, const Document &docNew, const Docu
     qDebug() << data;
     auto request = api_.createRequest(documents + QString("%1/").arg(id));
     return { manager_.put(request, data), [](auto r){
-            QRestReply reply(r);
-            // qDebug() << reply.readJson();
-            return true;
-        }
+                QRestReply reply(r);
+                // qDebug() << reply.readJson();
+                return true;
+            }
+    };
+}
+
+Reply<UiSettings> PaperlessApi::getUiSettings()
+{
+    auto request = api_.createRequest(ui_settings);
+    return { manager_.get(request), [](auto r){
+                QRestReply reply(r);
+                if (const auto json = reply.readJson(); json && json->isObject()) {
+                    auto result = json->toVariant();
+                    return UiSettings::fromVariant(result);
+                }
+                return UiSettings{};
+            }
     };
 }
 
@@ -123,7 +157,7 @@ Reply<bool> PaperlessApi::postBulkEdit(const QList<int> &documents, const QStrin
     auto data = QJsonDocument(obj).toJson(QJsonDocument::Compact);
     return { manager_.post(request, data), [](auto r){
                 QRestReply reply(r);
-                qDebug() << reply.readJson();
+                // qDebug() << reply.readJson();
                 return true;
             }
     };
