@@ -1,5 +1,5 @@
 #include "client.h"
-#include "qstackedwidget.h"
+#include "accountmanager.h"
 #include "ui_client.h"
 
 #include "accountwindow.h"
@@ -8,7 +8,9 @@
 #include "viewwidget.h"
 #include "pageswitcher.h"
 
+#include <QLabel>
 #include <QSplitter>
+#include <QWidgetAction>
 
 Client::Client(QWidget *parent) :
     QMainWindow(parent),
@@ -22,7 +24,10 @@ QTreeView::item {
   min-height: 34px;
 })");
 
-    // auto downloader = new CurlDownloader(this);
+    updateCurrentAccount();
+    updateAccountList();
+    connect(AccountManager::manager(), &AccountManager::currentAccountUpdated, this, &Client::updateCurrentAccount);
+    connect(AccountManager::manager(), &AccountManager::accountListUpdated, this, &Client::updateAccountList);
 
     menuBar_ = new QMenuBar(this);
     menuBar_->hide();
@@ -102,5 +107,24 @@ void Client::mergeMenuBar()
             }
         }
     // emit menuBarChanged();
+}
+
+void Client::updateCurrentAccount()
+{
+    ui->actionAccount->setText(tr("Current Account: %1").arg(AccountManager::manager()->currentAccount().username));
+}
+
+void Client::updateAccountList()
+{
+    // ui->actionSwitch_To->menu()->clear();
+    auto menu = new QMenu(this);
+    ui->actionSwitch_To->setMenu(menu);
+    for(auto &&[server, list] : AccountManager::manager()->accountMap().asKeyValueRange()){
+        for(auto &&account : list){
+            menu->addAction(account.username, [account]{
+                AccountManager::manager()->setCurrentAccount(account);
+            });
+        }
+    }
 }
 

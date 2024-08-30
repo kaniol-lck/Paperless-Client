@@ -6,6 +6,8 @@
 
 class Paperless;
 
+
+class Account;
 namespace Ui {
 class AccountWindow;
 }
@@ -22,10 +24,13 @@ private slots:
     void onCurrentRowChanged(const QModelIndex &current, const QModelIndex &previous);
 
     void on_activate_clicked();
+    void on_new_pb_clicked();
+    void on_remove_pb_clicked();
 
 private:
     Ui::AccountWindow *ui;
     Paperless *client_;
+    Account *selectedAccount_;
 };
 
 #endif // ACCOUNTWINDOW_H

@@ -24,6 +24,9 @@ private slots:
     void on_actionLogin_triggered();
     void mergeMenuBar();
 
+    void updateCurrentAccount();
+    void updateAccountList();
+
 private:
     Ui::Client *ui;
     Paperless *client_;

@@ -17,6 +17,8 @@ public:
     explicit LoginDialog(Paperless *client, QWidget *parent = nullptr);
     ~LoginDialog();
 
+    void setServer(const QString &server);
+
 private slots:
     void on_buttonBox_accepted();
 

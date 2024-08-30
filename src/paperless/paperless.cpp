@@ -7,6 +7,9 @@ Paperless::Paperless(QObject *parent) :
     api_(new PaperlessApi(this))
 {
     api_->setAccount(AccountManager::manager()->currentAccount());
+    connect(AccountManager::manager(), &AccountManager::currentAccountUpdated, this, [this]{
+        api_->setAccount(AccountManager::manager()->currentAccount());
+    });
     connect(this, &Paperless::uiSettingsUpdated, this, [this]{
         auto reply = api_->getAppLogo(uiSettings_);
         reply.setOnFinished(this, [this](QPixmap &&pixmap){

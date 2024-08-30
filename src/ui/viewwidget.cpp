@@ -35,6 +35,11 @@ ViewWidget::ViewWidget(QWidget *parent, Paperless *client, SavedView view) :
 
     connect(ui->treeView->selectionModel(), &QItemSelectionModel::selectionChanged, this, &ViewWidget::onSelectedChanged);
 
+    // tool bar
+    ui->actionDownload->setIcon(QIcon::fromTheme(QIcon::ThemeIcon::DocumentSave));
+    ui->actionBulk_Download->setIcon(QIcon::fromTheme(QIcon::ThemeIcon::DocumentSave));
+    ui->actionEdit_Mode->setIcon(QIcon::fromTheme(QIcon::ThemeIcon::MailMessageNew));
+
     // search bar
     ui->searchBar->insertWidget(ui->actionSearch, searchSelect_);
     ui->searchBar->insertWidget(ui->actionSearch, searchLine_);
@@ -61,6 +66,8 @@ ViewWidget::ViewWidget(QWidget *parent, Paperless *client, SavedView view) :
         isNewSearch_ = false;
         search(index + 1);
     });
+    ui->actionPrevious_Page->setIcon(QIcon::fromTheme(QIcon::ThemeIcon::GoPrevious));
+    ui->actionNext_Page->setIcon(QIcon::fromTheme(QIcon::ThemeIcon::GoNext));
 
     ui->treeView->setAlternatingRowColors(true);
     getDocs();

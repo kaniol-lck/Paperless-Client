@@ -44,6 +44,8 @@
      <string>Settings</string>
     </property>
     <addaction name="actionLogin"/>
+    <addaction name="actionAccount"/>
+    <addaction name="actionSwitch_To"/>
     <addaction name="separator"/>
     <addaction name="actionPreferences"/>
    </widget>
@@ -67,6 +69,16 @@
   <action name="actionPreferences">
    <property name="text">
     <string>Preferences</string>
+   </property>
+  </action>
+  <action name="actionAccount">
+   <property name="text">
+    <string>Account</string>
+   </property>
+  </action>
+  <action name="actionSwitch_To">
+   <property name="text">
+    <string>Switch To...</string>
    </property>
   </action>
  </widget>

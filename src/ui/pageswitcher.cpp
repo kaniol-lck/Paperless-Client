@@ -165,7 +165,8 @@ void PageSwitcher::syncViewList()
 
 void PageSwitcher::addWindow(QMainWindow *window, WindowCategory category)
 {
-    auto item = new QStandardItem(window->windowIcon(), window->windowTitle());
+    //NOTE: wo do not need icon
+    auto item = new QStandardItem(/*window->windowIcon(), */window->windowTitle());
     item->setData(QVariant::fromValue(window));
     addSubWindowForItem(item);
     model_.item(category)->appendRow(item);
@@ -174,7 +175,6 @@ void PageSwitcher::addWindow(QMainWindow *window, WindowCategory category)
 QMdiSubWindow *PageSwitcher::addSubWindowForItem(QStandardItem *item)
 {
     auto w = item->data().value<QMainWindow *>();
-    // w->load();
     //disable menubar
     w->menuBar()->setNativeMenuBar(false);
     w->menuBar()->hide();

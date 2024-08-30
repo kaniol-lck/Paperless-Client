@@ -1,6 +1,7 @@
 #include "accountwindow.h"
 #include "accountmanager.h"
 #include "paperless/paperless.h"
+#include "ui/logindialog.h"
 #include "ui_accountwindow.h"
 
 #include <QStandardItemModel>
@@ -20,7 +21,7 @@ AccountWindow::AccountWindow(QWidget *parent, Paperless *client):
     connect(ui->userList_treeView->selectionModel(), &QItemSelectionModel::currentRowChanged, this, &AccountWindow::onCurrentRowChanged);
 
     // updateAccountList();
-    // connect(AccountManager::manager(), &AccountManager::accountListUpdated, this, &AccountWindow::updateAccountList);
+    connect(AccountManager::manager(), &AccountManager::accountListUpdated, ui->userList_treeView, &QTreeView::expandAll);
 }
 
 AccountWindow::~AccountWindow()
@@ -30,10 +31,11 @@ AccountWindow::~AccountWindow()
 
 void AccountWindow::onCurrentRowChanged(const QModelIndex &current, const QModelIndex &previous)
 {
-    auto account = AccountManager::manager()->accountAt(current);
-    if(!account) return;
-    ui->server->setText(account->server);
-    ui->username->setText(account->username);
+    selectedAccount_ = AccountManager::manager()->accountAt(current);
+    ui->remove_pb->setEnabled(selectedAccount_);
+    if(!selectedAccount_) return;
+    ui->server->setText(selectedAccount_->server);
+    ui->username->setText(selectedAccount_->username);
 
     ui->password->setText("");
     ui->firstName->setText("");
@@ -41,9 +43,9 @@ void AccountWindow::onCurrentRowChanged(const QModelIndex &current, const QModel
     ui->email->setText("");
 
     static PaperlessApi api;
-    api.setAccount(*account);
-    if(account->id != 0){
-        api.getUser(account->id).setOnFinished(this, [this](User &&user){
+    api.setAccount(*selectedAccount_);
+    if(selectedAccount_->id != 0){
+        api.getUser(selectedAccount_->id).setOnFinished(this, [this](User &&user){
             ui->password->setText(user.password);
             ui->firstName->setText(user.first_name);
             ui->lastName->setText(user.last_name);
@@ -56,8 +58,24 @@ void AccountWindow::on_activate_clicked()
 {
     auto indexes = ui->userList_treeView->selectionModel()->selectedIndexes();
     if(indexes.isEmpty()) return;
-    auto account = AccountManager::manager()->accountAt(indexes.first());
-    if(!account) return;
-    client_->api()->setAccount(*account);
+    if(!selectedAccount_) return;
+    client_->api()->setAccount(*selectedAccount_);
     client_->updateAll();
 }
+
+void AccountWindow::on_new_pb_clicked()
+{
+    auto dialog = new LoginDialog(client_, this);
+    if(selectedAccount_)
+        dialog->setServer(selectedAccount_->server);
+    dialog->show();
+    // connect(dialog, &QDialog::accepted, this, [this]{
+    //     client_->updateAll();
+    // });
+}
+
+void AccountWindow::on_remove_pb_clicked()
+{
+    AccountManager::manager()->removeAccount(*selectedAccount_);
+}
+

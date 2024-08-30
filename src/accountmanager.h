@@ -17,12 +17,16 @@ public:
     void setId4CurrentAccount(int id);
 
     void addAccount(const QString &server, const QString &username, const QString &token);
+    void removeAccount(const Account& account);
 
     QStandardItemModel *model() const;
 
     Account *accountAt(const QModelIndex& index);
 
+    QMap<QString, QList<Account> > accountMap() const;
+
 signals:
+    void currentAccountUpdated();
     void accountListUpdated();
 
 private:

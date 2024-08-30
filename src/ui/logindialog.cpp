@@ -21,6 +21,11 @@ LoginDialog::~LoginDialog()
     delete ui;
 }
 
+void LoginDialog::setServer(const QString &server)
+{
+    ui->server->setText(server);
+}
+
 void LoginDialog::on_buttonBox_accepted()
 {
     ui->progressBar->show();

@@ -21,6 +21,7 @@ AccountManager *AccountManager::manager()
 void AccountManager::setCurrentAccount(const Account &account)
 {
     currentAccount_ = account;
+    emit currentAccountUpdated();
     writeToFile();
 }
 
@@ -48,6 +49,16 @@ void AccountManager::addAccount(const QString &server, const QString &username, 
     readFromFile();
 }
 
+void AccountManager::removeAccount(const Account &account)
+{
+    //TODO: current?
+    accountMap_[account.server].removeIf([&account](auto &&a){
+        return a.username == account.username;
+    });
+    writeToFile();
+    readFromFile();
+}
+
 QStandardItemModel *AccountManager::model() const
 {
     return model_;
@@ -59,6 +70,11 @@ Account *AccountManager::accountAt(const QModelIndex &index)
         return &accountMap_[parent.data().toString()][index.row()];
     }
     return nullptr;
+}
+
+QMap<QString, QList<Account> > AccountManager::accountMap() const
+{
+    return accountMap_;
 }
 
 Account AccountManager::currentAccount() const
@@ -102,6 +118,7 @@ void AccountManager::readFromFile()
     }
 
     emit accountListUpdated();
+    emit currentAccountUpdated();
 }
 
 void AccountManager::writeToFile()
