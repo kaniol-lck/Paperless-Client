@@ -51,9 +51,9 @@ ViewWidget::ViewWidget(QWidget *parent, Paperless *client, SavedView view) :
         });
     }
 
-    searchSelect_->addItem("title", "title__icontains");
-    searchSelect_->addItem("content", "content__icontains");
-    searchSelect_->addItem("title & content", "title_content");
+    searchSelect_->addItem(tr("title"), "title__icontains");
+    searchSelect_->addItem(tr("content"), "content__icontains");
+    searchSelect_->addItem(tr("title & content"), "title_content");
 
     // page bar
     ui->pageBar->insertWidget(ui->actionNext_Page, pageSelect_);
@@ -146,7 +146,7 @@ void ViewWidget::setList(const ReturnList<Document> &list)
         pageSelect_->blockSignals(true);
         pageSelect_->clear();
         for(int i = 1; i <= list.count / 25 + 1; i++){
-            pageSelect_->addItem(QString("page %1").arg(i));
+            pageSelect_->addItem(tr("Page %1").arg(i));
         }
         pageSelect_->blockSignals(false);
     }

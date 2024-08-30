@@ -13,15 +13,7 @@ PaperlessApi::PaperlessApi(QObject *parent) :
     QObject(parent),
     bulkEdit(this),
     manager_(new QNetworkAccessManager)
-{
-    url_ = QSettings().value("url").toUrl();
-    api_.setBaseUrl(url_);
-    token_ = QSettings().value("token").toString();
-    QHttpHeaders headers;
-    headers.append("Authorization", "Token " + token_);
-    headers.append(QHttpHeaders::WellKnownHeader::ContentType, "application/json");
-    api_.setCommonHeaders(headers);
-}
+{}
 
 QUrl PaperlessApi::documentDownloadUrl(int documentId)
 {
@@ -82,37 +74,20 @@ Reply<QPixmap> PaperlessApi::getDocumentThumb(const Document &document)
     };
 }
 
-void PaperlessApi::setUrl(const QUrl &newUrl)
-{
-    url_ = newUrl;
-    api_.setBaseUrl(url_);
-}
-
-Reply<bool> PaperlessApi::login(const QUrl &url, const QString &username, const QString &password)
+Reply<QString> PaperlessApi::login(const QUrl &url, const QString &username, const QString &password)
 {
     QNetworkRequestFactory tempApi;
     tempApi.setBaseUrl(url);
     QVariantMap data;
     data.insert("username", {username});
     data.insert("password", {password});
-    return { manager_.post(tempApi.createRequest(token), data), [this, url](auto r){
+    return { manager_.post(tempApi.createRequest(token), data), [](auto r){
                 QRestReply reply(r);
                 if (const auto json = reply.readJson(); json && json->isObject()) {
                     auto result = json->toVariant();
-                    setUrl(url);
-                    token_ = value(result, "token").toString();
-                    QHttpHeaders headers;
-                    headers.append("Authorization", "Token " + token_);
-                    headers.append(QHttpHeaders::WellKnownHeader::ContentType, "application/json");
-                    api_.clearCommonHeaders();
-                    api_.setCommonHeaders(headers);
-                    QSettings().setValue("url", api_.baseUrl());
-                    QSettings().setValue("token", token_);
-                    emit tokenChanged();
-                    getDocumentList();
-                    return true;
+                    return value(result, "token").toString();
                 }
-                return false;
+                return QString{};
             }
     };
 }
@@ -143,6 +118,18 @@ Reply<UiSettings> PaperlessApi::getUiSettings()
                 return UiSettings{};
             }
     };
+}
+
+void PaperlessApi::setAccount(const Account &newAccount)
+{
+    account_ = newAccount;
+    api_.setBaseUrl(account_.server);
+
+    QHttpHeaders headers;
+    headers.append("Authorization", "Token " + account_.token);
+    headers.append(QHttpHeaders::WellKnownHeader::ContentType, "application/json");
+    api_.clearCommonHeaders();
+    api_.setCommonHeaders(headers);
 }
 
 Reply<bool> PaperlessApi::postBulkEdit(const QList<int> &documents, const QString &method, const QJsonObject &args)

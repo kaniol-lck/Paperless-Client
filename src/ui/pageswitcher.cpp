@@ -4,7 +4,6 @@
 #include  <QMdiSubWindow>
 
 #include "paperless/paperless.h"
-#include "paperless/paperlessapi.h"
 #include "viewwidget.h"
 
 PageSwitcher::PageSwitcher(QWidget *parent, Paperless *client) :
@@ -41,7 +40,7 @@ void PageSwitcher::addMainPage()
 void PageSwitcher::addDocumentsPage()
 {
     SavedView view;
-    view.name = "Document";
+    view.name = tr("Document");
     addWindow(new ViewWidget(this, client_, view), Main);
 }
 

@@ -6,6 +6,7 @@
 #include <QNetworkRequestFactory>
 #include <QList>
 
+#include "Account.h"
 #include "paperless/Correspondent.h"
 #include "paperless/Group.h"
 #include "paperless/UiSettings.h"
@@ -34,6 +35,12 @@ Reply<ReturnList<Type>> get##Type##List(int page = 0)  \
 Reply<ReturnList<Type>> get##Type##List(const QUrl &url)  \
 { \
     return getReturnList<Type>(url); \
+}
+
+#define DEFINE_ITEM_API(name, Type) \
+Reply<Type> get##Type(int id)  \
+{ \
+    return getItem<Type>(name, id); \
 }
 
 #define BULK_EDIT_METHOD(method, value, Type) \
@@ -68,6 +75,16 @@ public:
     BulkEdit bulkEdit;
     explicit PaperlessApi(QObject *parent = nullptr);
 
+    DEFINE_ITEM_API(documents, Document);
+    DEFINE_ITEM_API(saved_views, SavedView);
+    DEFINE_ITEM_API(custom_fields, CustomField);
+    DEFINE_ITEM_API(document_types, DocumentType);
+    DEFINE_ITEM_API(storage_paths, StoragePath);
+    DEFINE_ITEM_API(tags, Tag);
+    DEFINE_ITEM_API(correspondents, Correspondent);
+    DEFINE_ITEM_API(users, User);
+    DEFINE_ITEM_API(groups, Group);
+
     DEFINE_RETURNLIST_API(documents, Document);
     DEFINE_RETURNLIST_API(saved_views, SavedView);
     DEFINE_RETURNLIST_API(custom_fields, CustomField);
@@ -88,9 +105,7 @@ public:
     Reply<QPixmap> getAppLogo(const UiSettings &uiSettings);
     Reply<QPixmap> getDocumentThumb(const Document &document);
 
-    void setUrl(const QUrl &newUrl);
-
-    Reply<bool> login(const QUrl &url, const QString &username, const QString &password);
+    Reply<QString> login(const QUrl &url, const QString &username, const QString &password);
 
     Reply<bool> putDocument(int id, const Document &docNew, const Document &docOld);
 
@@ -102,9 +117,7 @@ signals:
 private:
     QRestAccessManager manager_;
     QNetworkRequestFactory api_;
-    QUrl url_;
-
-    QString token_;
+    Account account_;
 
     DEFINE_ENDPOINT(token)
     DEFINE_ENDPOINT(correspondents)
@@ -129,6 +142,20 @@ private:
 
     static constexpr auto bulk_edit = "/api/documents/bulk_edit/";
     static constexpr auto bulk_download = "/api/documents/bulk_download/";
+
+    template<typename T>
+    inline Reply<T> getItem(const QString &field, int id)
+    {
+        auto request = api_.createRequest(field + QString("%1/").arg(id));
+        return { manager_.get(request), [](auto reply){
+                    QRestReply restReply(reply);
+                    if (const auto json = restReply.readJson(); json && json->isObject()) {
+                        auto result = json->toVariant();
+                        return T::fromVariant(result);
+                    }
+                    return T{};
+                }};
+    }
 
     template<typename T>
     inline Reply<ReturnList<T> > getReturnList(QNetworkRequest request)
@@ -184,6 +211,8 @@ public:
                                                                 BulkDownloadCompression compression = Lzma);
     Reply<bool> postBulkDownload(const QList<int> documents, BulkDownloadContent content = Originals,
                                  BulkDownloadCompression compression = Lzma);
+    void setToken(const QString &newToken);
+    void setAccount(const Account &newAccount);
 };
 
 #endif // PAPERLESSAPI_H

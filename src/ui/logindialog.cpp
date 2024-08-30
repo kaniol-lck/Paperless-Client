@@ -1,4 +1,5 @@
 #include "logindialog.h"
+#include "accountmanager.h"
 #include "paperless/paperless.h"
 #include "ui_logindialog.h"
 
@@ -23,11 +24,15 @@ LoginDialog::~LoginDialog()
 void LoginDialog::on_buttonBox_accepted()
 {
     ui->progressBar->show();
-    auto reply = client_->api()->login(ui->server->text(),
-                                       ui->username->text(),
-                                       ui->password->text());
-    reply.setOnFinished(this, [this](bool success){
-        if(success){
+    auto server = ui->server->text();
+    auto username = ui->username->text();
+    auto password = ui->password->text();
+    auto reply = client_->api()->login(server,
+                                       username,
+                                       password);
+    reply.setOnFinished(this, [=](QString token){
+        if(!token.isEmpty()){
+            AccountManager::manager()->addAccount(server, username, token);
             accept();
         }  else {
             ui->progressBar->hide();
@@ -39,4 +44,3 @@ void LoginDialog::on_buttonBox_accepted()
             qDebug() << "Failed: " << error;
         });
 }
-

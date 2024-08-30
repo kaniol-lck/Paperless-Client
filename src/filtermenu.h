@@ -4,9 +4,9 @@
 #include "paperless/paperless.h"
 #include "util/unclosedmenu.h"
 
-#define NEW_FILTER(Type, n) \
+#define NEW_FILTER(displayName, Type, n) \
 static FilterMenu *new##Type##Filter(Paperless *client, QWidget *parent = nullptr){ \
-    auto menu = new FilterMenu(tr(#Type), parent); \
+    auto menu = new FilterMenu(displayName, parent); \
     menu->setList(client->n##List()); \
     connect(client, &Paperless::n##ListUpdated, menu, [=]{ \
         menu->setList(client->n##List()); \
@@ -20,12 +20,12 @@ class FilterMenu : public UnclosedMenu
 public:
     explicit FilterMenu(const QString &name, QWidget *parent = nullptr);
 
-    NEW_FILTER(Correspondent, correspondent);
-    NEW_FILTER(DocumentType, document_type);
-    NEW_FILTER(CustomField, custom_field);
-    NEW_FILTER(StoragePath, storage_path);
-    NEW_FILTER(Tag, tag);
-    NEW_FILTER(User, user);
+    NEW_FILTER(tr("Correspondent"), Correspondent, correspondent);
+    NEW_FILTER(tr("Document Type"), DocumentType, document_type);
+    NEW_FILTER(tr("Custom Field"), CustomField, custom_field);
+    NEW_FILTER(tr("Storage Path"), StoragePath, storage_path);
+    NEW_FILTER(tr("Tag"), Tag, tag);
+    NEW_FILTER(tr("User"), User, user);
 
     enum RuleType{
         TagIn = 22,

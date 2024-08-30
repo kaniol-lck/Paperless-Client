@@ -1,4 +1,5 @@
 #include "client.h"
+#include "qstackedwidget.h"
 #include "ui_client.h"
 
 #include "accountwindow.h"
@@ -31,25 +32,26 @@ QTreeView::item {
     }
 
     auto splitter = new QSplitter(this);
-    splitter->addWidget(ui->pageTreeView);
+
+    splitter->addWidget(ui->pageSelector);
     splitter->addWidget(pageSwitcher_);
     setCentralWidget(splitter);
 
     // setCentralWidget(pageSwitcher_);
-    ui->pageTreeView->setModel(pageSwitcher_->model());
+    ui->pageSelector->setModel(pageSwitcher_->model());
 
-    connect(ui->pageTreeView, &WindowSelectorWidget::windowChanged, pageSwitcher_, &PageSwitcher::setPage);
-    connect(pageSwitcher_, &PageSwitcher::pageChanged, ui->pageTreeView, &WindowSelectorWidget::setCurrentIndex);
+    connect(ui->pageSelector, &WindowSelectorWidget::windowChanged, pageSwitcher_, &PageSwitcher::setPage);
+    connect(pageSwitcher_, &PageSwitcher::pageChanged, ui->pageSelector, &WindowSelectorWidget::setCurrentIndex);
     connect(pageSwitcher_, &PageSwitcher::pageChanged, this, &Client::mergeMenuBar);
 
     pageSwitcher_->addMainPage();
     pageSwitcher_->addDocumentsPage();
     pageSwitcher_->setPage(PageSwitcher::Main, 0);
 
-    pageSwitcher_->addSettingsWindow(new AccountWindow(this));
+    pageSwitcher_->addSettingsWindow(new AccountWindow(this, client_));
     pageSwitcher_->addSettingsWindow(new SettingsWindow(this));
 
-    client_->updateAllList();
+    client_->updateAll();
 
     connect(client_, &Paperless::appLogoUpdated, this, [this]{
         setWindowIcon(client_->appLogo());
@@ -57,7 +59,6 @@ QTreeView::item {
     connect(client_, &Paperless::uiSettingsUpdated, this, [this]{
         setWindowTitle(client_->appTitle());
     });
-    client_->updateUiSettings();
 
     mergeMenuBar();
 }
@@ -72,7 +73,7 @@ void Client::on_actionLogin_triggered()
     auto dialog = new LoginDialog(client_, this);
     dialog->show();
     connect(dialog, &QDialog::accepted, this, [this]{
-        client_->updateAllList();
+        client_->updateAll();
     });
 }
 

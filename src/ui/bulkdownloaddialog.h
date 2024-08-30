@@ -19,15 +19,9 @@ signals:
     // void readyDownload(QString filename, int content, int compression);
 
 private slots:
-    void on_toolButton_clicked();
     void on_BulkDownloadDialog_accepted();
 
-    void on_autoUnzip_toggled(bool checked);
-
-    void on_savePath_textChanged(const QString &arg1);
-
 private:
-    QString savePath_;
     Ui::BulkDownloadDialog *ui;
     Paperless *client_;
     QList<int> docs_;

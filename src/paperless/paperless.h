@@ -38,7 +38,7 @@ public:
     explicit Paperless(QObject *parent = nullptr);
     // static Paperless *client();
 
-    void updateAllList()
+    void updateAll()
     {
         updateDocumentTypeList();
         updateCustomFieldList();
@@ -48,6 +48,8 @@ public:
         updateCorrespondentList();
         updateUserList();
         updateGroupList();
+
+        updateUiSettings();
     }
 
     ID2NAME(Correspondent, correspondent);
@@ -71,6 +73,7 @@ public:
 
     QIcon appLogo() const;
     QString appTitle() const;
+    User currentUser();
 
 signals:
     DEFINE_LIST_S(Correspondent, correspondent);

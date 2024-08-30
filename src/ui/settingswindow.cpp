@@ -7,6 +7,7 @@ SettingsWindow::SettingsWindow(QWidget *parent)
 {
     ui->setupUi(this);
     setWindowTitle(tr("App Settings"));
+    setWindowIcon(QIcon::fromTheme(QIcon::ThemeIcon::DocumentProperties));
 }
 
 SettingsWindow::~SettingsWindow()

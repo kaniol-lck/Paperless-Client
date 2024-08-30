@@ -9,6 +9,7 @@
 class Paperless;
 class DocumentModel : public QAbstractTableModel
 {
+    Q_OBJECT
 public:
     explicit DocumentModel(QObject *parent/* = nullptr*/, Paperless *client);
 

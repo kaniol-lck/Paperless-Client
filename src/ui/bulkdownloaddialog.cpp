@@ -8,6 +8,7 @@
 
 #include "paperless/paperless.h"
 #include "util/curldownloader.h"
+#include "util/util.h"
 
 BulkDownloadDialog::BulkDownloadDialog(Paperless *client, QList<int> docs, QWidget *parent):
     QDialog(parent),
@@ -23,51 +24,30 @@ BulkDownloadDialog::~BulkDownloadDialog()
     delete ui;
 }
 
-void BulkDownloadDialog::on_toolButton_clicked()
-{
-    if(ui->autoUnzip->isChecked()){
-        savePath_ = QFileDialog::getExistingDirectory(this, tr("Save Zip"), ui->savePath->text());
-    }else{
-        savePath_ = QFileDialog::getSaveFileName(this, tr("Save Zip"), ui->savePath->text(), "*.zip");
-    }
-    ui->savePath->setText(savePath_);
-}
-
 void BulkDownloadDialog::on_BulkDownloadDialog_accepted()
 {
-    auto savePath = ui->savePath->text();
+    QString savePath;
     bool isDir = ui->autoUnzip->isChecked();
+    if(isDir){
+        savePath = QFileDialog::getExistingDirectory(this, tr("Save Zip"));
+    }else{
+        savePath = QFileDialog::getSaveFileName(this, tr("Save Zip"), "", "*.zip");
+    }
+
     if(isDir)
         savePath = QDir(savePath).filePath("__paperless__downloading__.zip");
     auto content = static_cast<PaperlessApi::BulkDownloadContent>(ui->contentSelect->currentIndex());
     auto compression = static_cast<PaperlessApi::BulkDownloadCompression>(ui->compressionSelect->currentIndex());
     auto [request, data] = client_->api()->bulkDownloadRequest(docs_, content, compression);
     auto downloader = new CurlDownloader(client_);
-    connect(downloader, &CurlDownloader::finished, client_, [this, isDir]{
+    connect(downloader, &CurlDownloader::finished, client_, [ isDir, savePath]{
         if(isDir){
-            //TODO
+            //TODO: expand does not support lzma
             // QProcess::execute("Expand-Archive", {}))
+            openFolder(QFileInfo(savePath).dir().path());
         } else
-            QProcess::startDetached("explorer.exe", { "/select,"+QDir::toNativeSeparators(savePath_) });
+            openFileInFolder(savePath);
         return;
     });
-    downloader->download(request, savePath_, data);
+    downloader->download(request, savePath, data);
 }
-
-void BulkDownloadDialog::on_autoUnzip_toggled(bool checked)
-{
-    if(checked){
-        if(QFileInfo info(savePath_); info.isFile())
-            ui->savePath->setText(info.path());
-    } else{
-        ui->savePath->setText(savePath_);
-    }
-}
-
-void BulkDownloadDialog::on_savePath_textChanged(const QString &arg1)
-{
-    QFileInfo info(arg1);
-    auto path = info.isFile()? info.path() : arg1;
-    ui->buttonBox->button(QDialogButtonBox::Ok)->setEnabled(QDir(path).exists());
-}
-
