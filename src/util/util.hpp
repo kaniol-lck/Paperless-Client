@@ -1,6 +1,8 @@
 #ifndef UTIL_HPP
 #define UTIL_HPP
 
+#include <QJsonObject>
+#include <QJsonArray>
 #include <QVariant>
 
 template<typename Container, typename ... list>
@@ -45,14 +47,14 @@ obj.insert(#attr, attr.toString());
 
 #define put_attr_intlist(obj, attr) \
 QJsonArray attr##arr; \
-for(auto i : attr) arr.append(i); \
+for(auto &&i : attr) attr##arr.append(i); \
 obj.insert(#attr, attr##arr); \
 
 #define put_attr_list(obj, attr) \
 if(!attr.isEmpty()){ \
-    QJsonArray arr; \
-    for(auto &&i : attr) arr.append(i.toJson()); \
-    obj.insert(#attr, arr); \
+    QJsonArray attr##arr; \
+    for(auto &&i : attr) attr##arr.append(i.toJson()); \
+    obj.insert(#attr, attr##arr); \
 }
 
 #endif // UTIL_HPP

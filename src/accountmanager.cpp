@@ -72,7 +72,7 @@ Account *AccountManager::accountAt(const QModelIndex &index)
     return nullptr;
 }
 
-QMap<QString, QList<Account> > AccountManager::accountMap() const
+ServerMap<QList<Account> > AccountManager::accountMap() const
 {
     return accountMap_;
 }
@@ -99,7 +99,6 @@ void AccountManager::readFromFile()
 {
     QFile file(fileName);
     if(!file.open(QIODevice::ReadOnly)) return;
-
     auto variant = QJsonDocument::fromJson(file.readAll()).toVariant();
 
     currentAccount_ = Account::fromVariant(value(variant, "current_account"));
@@ -129,15 +128,7 @@ void AccountManager::writeToFile()
 
     object.insert("current_account", currentAccount_.toJson());
 
-    QJsonObject accountsObj;
-    for(auto &&[server, list] : accountMap_.asKeyValueRange()){
-        QJsonArray serverArr;
-        for(auto &&account : list){
-            serverArr.append(account.toJson());
-        }
-        accountsObj.insert(server, serverArr);
-    }
-    object.insert("accounts", accountsObj);
+    object.insert("accounts", accountMap_.toJson());
 
     file.write(QJsonDocument(object).toJson());
 }

@@ -1,6 +1,7 @@
 #include "paperless.h"
 
 #include "accountmanager.h"
+#include "customviews.h"
 
 Paperless::Paperless(QObject *parent) :
     QObject(parent),
@@ -51,4 +52,14 @@ QString Paperless::appTitle() const
 User Paperless::currentUser()
 {
     return uiSettings_.user;
+}
+
+QList<CustomSavedView> Paperless::customViewList()
+{
+    return CustomViews::views()->viewMap().value(api_->server());
+}
+
+bool Paperless::hideRemote()
+{
+    return CustomViews::views()->getHide_remote();
 }

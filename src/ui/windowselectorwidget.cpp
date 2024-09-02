@@ -14,28 +14,28 @@ WindowSelectorWidget::WindowSelectorWidget(QWidget *parent) :
     setHeaderHidden(true);
     setEditTriggers(QAbstractItemView::NoEditTriggers);
 
-//     setStyleSheet(R"(
-// * {
-//   outline:0px;
-// }
+    setStyleSheet(R"(
+* {
+  outline:0px;
+}
 
-// QTreeView {
-//   background-color: #333;
-//   color: whitesmoke;
-// }
+QTreeView {
+  background-color: #333;
+  color: whitesmoke;
+}
 
-// QLabel {
-//   background-color: transparent;
-//   color: whitesmoke;
-// }
+QLabel {
+  background-color: transparent;
+  color: whitesmoke;
+}
 
-// QTreeView::item:selected {
-//   border-left: 3px solid #4ae;
-//   background-color: #444;
-//   color: transparent;
-// }
+QTreeView::item:selected {
+  border-left: 3px solid #4ae;
+  background-color: #444;
+  color: transparent;
+}
 
-// )");
+)");
 
 }
 
@@ -43,7 +43,7 @@ void WindowSelectorWidget::setModel(QAbstractItemModel *model)
 {
     model_ = model;
     QTreeView::setModel(model);
-    // setRootIndex(model_->index(PageSwitcher::View, 0));
+    setRootIndex(model_->index(PageSwitcher::View, 0));
     connect(selectionModel(), &QItemSelectionModel::currentRowChanged, this, &WindowSelectorWidget::onCurrentRowChanged);
     expandAll();
 }
@@ -75,7 +75,8 @@ void WindowSelectorWidget::paintEvent(QPaintEvent *event)
         if(show){
             if(indexWidget(index)) continue;
             auto text = model_->data(index).toString();
-            auto widget = new SavedViewItemWidget(this, text, text);
+            auto description = model_->data(index, Qt::UserRole + 2).toString();
+            auto widget = new SavedViewItemWidget(this, text, description);
             setIndexWidget(index, widget);
         }
     }

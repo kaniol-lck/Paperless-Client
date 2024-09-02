@@ -95,6 +95,8 @@ public:
     DEFINE_RETURNLIST_API(users, User);
     DEFINE_RETURNLIST_API(groups, Group);
 
+    QString server();
+
     QUrl documentDownloadUrl(int documentId);
     QUrl documentPreviewUrl(int documentId);
     QUrl documentThumbUrl(int documentId);

@@ -73,6 +73,12 @@ ViewWidget::ViewWidget(QWidget *parent, Paperless *client, SavedView view) :
     getDocs();
 }
 
+ViewWidget::ViewWidget(QWidget *parent, Paperless *client, CustomSavedView view) :
+    ViewWidget(parent, client, SavedView(view))
+{
+    description_ = view.description;
+}
+
 ViewWidget::~ViewWidget()
 {
     delete ui;
@@ -266,6 +272,11 @@ void ViewWidget::on_actionImport_CSV_triggered()
 void ViewWidget::on_actionEdit_Mode_toggled(bool arg1)
 {
     ui->stackedWidget->setCurrentIndex(arg1? 1 : 0);
+}
+
+QString ViewWidget::description() const
+{
+    return description_;
 }
 
 #define INDEX_WIDGET(Type, n) \

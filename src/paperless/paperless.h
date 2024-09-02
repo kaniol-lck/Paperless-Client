@@ -2,12 +2,13 @@
 #define PAPERLESS_H
 
 #include <QObject>
+#include <QIcon>
 
 #include "paperless/Document.h"
 #include "paperless/SavedView.h"
 #include "paperless/StoragePath.h"
 #include "paperless/paperlessapi.h"
-#include "qicon.h"
+#include "customsavedview.h"
 
 #define DEFINE_LIST(Type, name) \
 public: QList<Type> name##List() const { return name##List_; } \
@@ -74,6 +75,9 @@ public:
     QIcon appLogo() const;
     QString appTitle() const;
     User currentUser();
+
+    QList<CustomSavedView> customViewList();
+    bool hideRemote();
 
 signals:
     DEFINE_LIST_S(Correspondent, correspondent);

@@ -127,8 +127,9 @@ void PageSwitcher::syncViewList()
         selectedViewWidget = viewWidget(currentPage);
 
     auto oldCount = model_.item(View)->rowCount();
-    auto viewList = client_->saved_viewList();
-    for(const auto &view : viewList){
+    // auto
+    auto customViewList = client_->customViewList();
+    for(const auto &view : customViewList){
         if(!view.show_in_sidebar) continue;
         if(auto i = findViewWidget(view); i < 0){
             //not present, new one
@@ -143,9 +144,27 @@ void PageSwitcher::syncViewList()
             model_.item(View)->appendRow(item);
         }
     }
+    if(!client_->hideRemote()){
+        auto viewList = client_->saved_viewList();
+        for(const auto &view : viewList){
+            if(!view.show_in_sidebar) continue;
+            if(auto i = findViewWidget(view); i < 0){
+                //not present, new one
+                addViewWidget(new ViewWidget(this, client_, view));
+            } else{
+                //present, move position
+                oldCount--;
+                auto item = model_.item(View)->takeRow(i).first();
+                //update info
+                item->setText(view.name);
+                // item->setIcon(view->info().icon());
+                model_.item(View)->appendRow(item);
+            }
+        }
+    }
     //remove remained mod path
     auto i = oldCount;
-    while (i--) {
+    while (i-- > 0) {
         removeViewWidget(i);
     }
 
@@ -161,6 +180,16 @@ void PageSwitcher::syncViewList()
     }
     //fallback
     setPage(Main, 0);
+}
+
+void PageSwitcher::addWindow(ViewWidget *window, WindowCategory category)
+{
+    //NOTE: wo do not need icon
+    auto item = new QStandardItem(/*window->windowIcon(), */window->windowTitle());
+    item->setData(QVariant::fromValue(window));
+    item->setData(window->description(), Qt::UserRole + 2);
+    addSubWindowForItem(item);
+    model_.item(category)->appendRow(item);
 }
 
 void PageSwitcher::addWindow(QMainWindow *window, WindowCategory category)

@@ -15,6 +15,11 @@ PaperlessApi::PaperlessApi(QObject *parent) :
     manager_(new QNetworkAccessManager)
 {}
 
+QString PaperlessApi::server()
+{
+    return api_.baseUrl().toString();
+}
+
 QUrl PaperlessApi::documentDownloadUrl(int documentId)
 {
     return api_.createRequest(QString("/api/documents/%1/download/").arg(documentId)).url();

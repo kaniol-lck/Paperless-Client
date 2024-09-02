@@ -15,7 +15,6 @@ SOURCES += \
 HEADERS += \
     $$files(src/*.h, true) \
     $$files(src/*.hpp, true)
-
 FORMS += \
     $$files(src/*.ui, true)
 

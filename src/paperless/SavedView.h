@@ -3,6 +3,9 @@
 
 #include "util/util.hpp"
 
+#include <QJsonObject>
+#include <QJsonArray>
+
 struct FilterRule
 {
     static auto fromVariant(const QVariant &variant){
@@ -10,6 +13,13 @@ struct FilterRule
         set_attr(rule, variant, rule_type, Int);
         set_attr(rule, variant, value, String);
         return rule;
+    }
+
+    QJsonObject toJson(){
+        QJsonObject object;
+        put_attr(object, rule_type);
+        put_attr(object, value);
+        return object;
     }
 
     int rule_type;
@@ -33,6 +43,23 @@ struct SavedView
         set_attr(view, variant, owner, Int);
         set_attr(view, variant, user_can_change, Bool);
         return view;
+    }
+
+    QJsonObject toJson(){
+        QJsonObject object;
+        put_attr(object, id);
+        put_attr(object, name);
+        put_attr(object, show_on_dashboard);
+        put_attr(object, show_in_sidebar);
+        put_attr(object, sort_field);
+        put_attr(object, sort_reverse);
+        put_attr_list(object, filter_rules);
+        put_attr(object, page_size);
+        put_attr(object, display_mode);
+        put_attr_intlist(object, display_fields);
+        put_attr(object, owner);
+        put_attr(object, user_can_change);
+        return object;
     }
 
     int id;

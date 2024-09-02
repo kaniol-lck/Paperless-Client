@@ -40,11 +40,17 @@ void BulkDownloadDialog::on_BulkDownloadDialog_accepted()
     auto compression = static_cast<PaperlessApi::BulkDownloadCompression>(ui->compressionSelect->currentIndex());
     auto [request, data] = client_->api()->bulkDownloadRequest(docs_, content, compression);
     auto downloader = new CurlDownloader(client_);
-    connect(downloader, &CurlDownloader::finished, client_, [ isDir, savePath]{
+    connect(downloader, &CurlDownloader::finished, client_, [isDir, savePath, this]{
         if(isDir){
-            //TODO: expand does not support lzma
-            // QProcess::execute("Expand-Archive", {}))
-            openFolder(QFileInfo(savePath).dir().path());
+            auto saveFolder = QFileInfo(savePath).dir().path();
+            auto p = new  QProcess(this);
+            //NOTE: put 7za in folder
+            p->start("./7za", { "x", savePath, "-o" + saveFolder });
+            connect(p, &QProcess::finished, this, [saveFolder, savePath, p]{
+                p->deleteLater();
+                QProcess::execute("rm", { "-f", savePath });
+                openFolder(saveFolder);
+            });
         } else
             openFileInFolder(savePath);
         return;

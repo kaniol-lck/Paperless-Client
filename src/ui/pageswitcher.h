@@ -43,6 +43,7 @@ public slots:
     void syncViewList();
 
 private:
+    void addWindow(ViewWidget *window, WindowCategory category);
     void addWindow(QMainWindow *window, WindowCategory category);
     QMdiSubWindow *addSubWindowForItem(QStandardItem *item);
     void removeSubWindowForItem(QStandardItem *item);

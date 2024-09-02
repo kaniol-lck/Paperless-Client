@@ -1,6 +1,7 @@
 #ifndef VIEWWIDGET_H
 #define VIEWWIDGET_H
 
+#include "customsavedview.h"
 #include "paperless/Document.h"
 #include "paperless/ReturnList.hpp"
 #include "paperless/SavedView.h"
@@ -22,9 +23,12 @@ class ViewWidget : public QMainWindow
 
 public:
     explicit ViewWidget(QWidget *parent/* = nullptr*/, Paperless *client, SavedView view = SavedView());
+    explicit ViewWidget(QWidget *parent/* = nullptr*/, Paperless *client, CustomSavedView view = CustomSavedView());
     ~ViewWidget();
 
     SavedView view() const;
+    QString description() const;
+
 public slots:
     void getDocs();
     void search(int page = 1);
@@ -59,6 +63,7 @@ private:
     QList<FilterMenu*> filters_;
     bool isNewSearch_ = true;
     QList<int> selectedDocs_;
+    QString description_;
 
     QToolButton *filter2button(FilterMenu *filter);
 

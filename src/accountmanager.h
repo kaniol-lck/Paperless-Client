@@ -3,6 +3,7 @@
 
 #include <QObject>
 
+#include "servermap.hpp"
 #include "Account.h"
 
 class AccountManager : public QObject
@@ -23,7 +24,7 @@ public:
 
     Account *accountAt(const QModelIndex& index);
 
-    QMap<QString, QList<Account> > accountMap() const;
+    ServerMap<QList<Account> > accountMap() const;
 
 signals:
     void currentAccountUpdated();
@@ -31,7 +32,7 @@ signals:
 
 private:
     Account currentAccount_;
-    QMap<QString, QList<Account>> accountMap_;
+    ServerMap<QList<Account>> accountMap_;
     QStandardItemModel *model_;
 
     static constexpr auto fileName = "accounts.json";
