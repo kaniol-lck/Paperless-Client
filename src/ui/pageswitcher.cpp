@@ -1,3 +1,4 @@
+#include "mainpagewindow.h"
 #include "pageswitcher.h"
 #include "qmenubar.h"
 
@@ -34,7 +35,7 @@ void PageSwitcher::previesPage()
 
 void PageSwitcher::addMainPage()
 {
-    // addWindow(new )
+    addWindow(new MainPageWindow(this), Main);
 }
 
 void PageSwitcher::addDocumentsPage()
@@ -170,6 +171,7 @@ void PageSwitcher::syncViewList()
 
     //they should be same after sync
     isSyncing_ = false;
+    emit syncFinished();
 
     //reset selected path
     if(selectedViewWidget){

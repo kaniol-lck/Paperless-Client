@@ -51,6 +51,8 @@ private slots:
 
     // void on_tableView_clicked(const QModelIndex &index);
 
+    void on_actionUpload_triggered();
+
 private:
     Ui::ViewWidget *ui;
     QComboBox *searchSelect_;
@@ -61,12 +63,14 @@ private:
     SavedView view_;
     DocumentModel *model_;
     QList<FilterMenu*> filters_;
+    int currentPage_ = 1;
     bool isNewSearch_ = true;
     QList<int> selectedDocs_;
     QString description_;
 
     QToolButton *filter2button(FilterMenu *filter);
 
+    bool appendMode_;
     // QWidget interface
 protected:
     void paintEvent(QPaintEvent *event) override;

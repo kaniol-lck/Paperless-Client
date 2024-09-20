@@ -15,10 +15,10 @@ public:
 
     enum Column{
         IdColumn,
+        TitleColumn,
         CorrespondentColumn,
         DocumentTypeColumn,
         StoragePathColumn,
-        TitleColumn,
         ContentColumn,
         TagsColumn,
         CreatedColumn,
@@ -46,7 +46,12 @@ public:
     QVariant headerData(int section, Qt::Orientation orientation, int role = Qt::DisplayRole) const override;
     Qt::ItemFlags flags(const QModelIndex &index) const override;
 
-    void setList(const ReturnList<Document> &newList);
+    QList<int> headerOf(const QStringList &docAttr);
+    Document docOf(QList<int> header, const QStringList &docAttr);
+    QJsonObject docJsonOf(QList<int> header, const QStringList &docAttr);
+
+    void setList(const QList<Document> &newList);
+    void appendList(const QList<Document> &newList);
 
     QList<int> sectionList(const SavedView &view);
 
@@ -55,10 +60,11 @@ public:
     QList<int> documentsAt(QList<QModelIndex> rows);
     // QList<const Document *> documentsAt(QList<QModelIndex> rows);
 
-    ReturnList<Document> &list();
+    QList<Document> &list();
+
 
 private:
-    ReturnList<Document> list_;
+    QList<Document> list_;
     Paperless *client_;
     bool inited_ = false;
 

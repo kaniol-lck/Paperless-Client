@@ -1,7 +1,7 @@
 #ifndef RETURNLIST_HPP
 #define RETURNLIST_HPP
 
-#include <Qurl>
+#include <QUrl>
 
 #include "util/util.hpp"
 

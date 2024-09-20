@@ -17,6 +17,17 @@ struct CustomFieldValue
         return customFieldValue;
     }
 
+    static QList<CustomFieldValue> fromVariantList(const QVariant &variant){
+        QList<CustomFieldValue> list;
+        for(auto &&[key, data] : variant.toMap().asKeyValueRange()){
+            CustomFieldValue customFieldValue;
+            customFieldValue.field = key.toInt();
+            customFieldValue.value = data.toString();
+            list << customFieldValue;
+        }
+        return list;
+    }
+
     QJsonObject toJson() const{
         QJsonObject object;
         put_attr(object, field);
@@ -52,7 +63,11 @@ struct Document
         set_attr(document, variant, user_can_change, Bool);
         set_attr(document, variant, is_shared_by_requester, Bool);
         set_attr(document, variant, notes, StringList);
-        set_attr_list(document, variant, custom_fields, CustomFieldValue);
+        if(value(variant, "custom_fields").canConvert<QVariantList>()){
+            set_attr_list(document, variant, custom_fields, CustomFieldValue);
+        } else {
+            document.custom_fields = CustomFieldValue::fromVariantList(value(variant, "custom_fields"));
+        }
 
         return document;
     }
@@ -61,9 +76,9 @@ struct Document
     {
         QJsonObject object;
         put_attr(object, id);
-        put_attr(object, correspondent); //required
-        put_attr(object, document_type); //required
-        put_attr(object, storage_path); //required
+        put_attr_null(object, correspondent); //required
+        put_attr_null(object, document_type); //required
+        put_attr_null(object, storage_path); //required
         put_attr(object, title);
         put_attr(object, content);
         QJsonArray arr;
@@ -92,9 +107,9 @@ struct Document
     {
         QJsonObject object;
         put_attr(object, id);
-        put_attr(object, correspondent); //required
-        put_attr(object, document_type); //required
-        put_attr(object, storage_path); //required
+        put_attr_null(object, correspondent); //required
+        put_attr_null(object, document_type); //required
+        put_attr_null(object, storage_path); //required
         if_put_attr(doc, object, title);
         if_put_attr(doc, object, content);
         QJsonArray arr;

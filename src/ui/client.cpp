@@ -9,7 +9,9 @@
 #include "pageswitcher.h"
 
 #include <QLabel>
+#include <QSettings>
 #include <QSplitter>
+#include <QVBoxLayout>
 #include <QWidgetAction>
 
 Client::Client(QWidget *parent) :
@@ -19,10 +21,13 @@ Client::Client(QWidget *parent) :
     pageSwitcher_(new PageSwitcher(this, client_))
 {
     ui->setupUi(this);
+
+    titleBar_ = new WindowsTitleBar(this, ui->menubar);
     setStyleSheet(R"(
 QTreeView::item {
   min-height: 34px;
-})");
+}
+)");
 
     updateCurrentAccount();
     updateAccountList();
@@ -31,30 +36,42 @@ QTreeView::item {
 
     menuBar_ = new QMenuBar(this);
     menuBar_->hide();
-    for(auto &&menuAction : menuBar()->actions()){
-        auto menu = menuBar_->addMenu(menuAction->icon(), menuAction->text());
-        menu->addActions(menuAction->menu()->actions());
+    for(auto &&menuAction : ui->menubar->actions()){
+        menuBar_->addMenu(menuAction->menu());
     }
 
-    auto splitter = new QSplitter(this);
+    splitter_ = new QSplitter(this);
 
-    splitter->addWidget(ui->pageSelector);
-    splitter->addWidget(pageSwitcher_);
-    setCentralWidget(splitter);
+    splitter_->addWidget(ui->pageSelector);
+    auto widget = new QWidget(this);
+    auto layout = new QVBoxLayout(widget);
+    layout->setContentsMargins(0, 0, 0, 0);
+    layout->setSpacing(0);
+    widget->setLayout(layout);
+    layout->addWidget(titleBar_);
+    layout->addWidget(pageSwitcher_);
+    splitter_->addWidget(widget);
+    setCentralWidget(splitter_);
 
     // setCentralWidget(pageSwitcher_);
     ui->pageSelector->setModel(pageSwitcher_->model());
 
     connect(ui->pageSelector, &WindowSelectorWidget::windowChanged, pageSwitcher_, &PageSwitcher::setPage);
+    connect(ui->pageSelector, &WindowSelectorWidget::windowChanged, this, [this](int category, int page){
+        titleBar_->setVisible(!(category == PageSwitcher::Main && page == 0));
+    });
     connect(pageSwitcher_, &PageSwitcher::pageChanged, ui->pageSelector, &WindowSelectorWidget::setCurrentIndex);
     connect(pageSwitcher_, &PageSwitcher::pageChanged, this, &Client::mergeMenuBar);
+    connect(pageSwitcher_, &PageSwitcher::syncFinished, this, &Client::updateViewList);
 
-    pageSwitcher_->addMainPage();
+    if(QSettings().value("ui/welcomePage").toBool())
+        pageSwitcher_->addMainPage();
     pageSwitcher_->addDocumentsPage();
-    pageSwitcher_->setPage(PageSwitcher::Main, 0);
 
     pageSwitcher_->addSettingsWindow(new AccountWindow(this, client_));
     pageSwitcher_->addSettingsWindow(new SettingsWindow(this));
+
+    pageSwitcher_->setPage(PageSwitcher::Main, 0);
 
     client_->updateAll();
 
@@ -87,6 +104,7 @@ void Client::mergeMenuBar()
     ui->menubar->clear();
     for(auto &&menuAction : menuBar_->actions()){
         auto menu = ui->menubar->addMenu(menuAction->icon(), menuAction->text());
+
         menu->addActions(menuAction->menu()->actions());
     }
     if(auto window = pageSwitcher_->currentWindow())
@@ -103,10 +121,24 @@ void Client::mergeMenuBar()
                 }
             if(!merged){
                 auto menu = ui->menubar->addMenu(menuAction->text());
+                // qDebug() << menu->menuAction()->text();
                 menu->addActions(menuAction->menu()->actions());
             }
         }
-    // emit menuBarChanged();
+}
+
+void Client::updateViewList()
+{
+    ui->menuViews->clear();
+    auto viewRoot = pageSwitcher_->model()->index(PageSwitcher::View, 0);
+
+    for(int i = 0; i < pageSwitcher_->model()->rowCount(viewRoot); i++){
+        ui->menuViews->addAction(pageSwitcher_->model()->index(i, 0, viewRoot).data().toString(),
+                        this, [this, i]{
+                            pageSwitcher_->setPage(PageSwitcher::View, i);
+                        });
+    }
+    // mergeMenuBar();
 }
 
 void Client::updateCurrentAccount()
@@ -126,5 +158,31 @@ void Client::updateAccountList()
             });
         }
     }
+}
+
+WindowsTitleBar *Client::titleBar() const
+{
+    return titleBar_;
+}
+
+void Client::closeEvent(QCloseEvent *event)
+{
+    emit closed();
+}
+
+void Client::on_actionPreferences_triggered()
+{
+    pageSwitcher_->setPage(PageSwitcher::Settings, 1);
+}
+
+
+void Client::on_actionAccount_Manager_triggered()
+{
+    pageSwitcher_->setPage(PageSwitcher::Settings, 0);
+}
+
+void Client::on_actionShow_Side_Bar_triggered(bool checked)
+{
+    // splitter_.
 }
 

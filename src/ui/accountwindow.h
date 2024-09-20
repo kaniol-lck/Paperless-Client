@@ -30,7 +30,7 @@ private slots:
 private:
     Ui::AccountWindow *ui;
     Paperless *client_;
-    Account *selectedAccount_;
+    Account *selectedAccount_ = nullptr;
 };
 
 #endif // ACCOUNTWINDOW_H

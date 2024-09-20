@@ -39,13 +39,13 @@ void LoginDialog::on_buttonBox_accepted()
         if(!token.isEmpty()){
             AccountManager::manager()->addAccount(server, username, token);
             accept();
-        }  else {
+        } else {
             ui->progressBar->hide();
             QMessageBox::warning(this, "1", "LoginFailed");
         }
-        }, [this](auto error){
-            ui->progressBar->hide();
-            QMessageBox::warning(this, "1", "LoginFailed");
-            qDebug() << "Failed: " << error;
-        });
+    }, [this](auto error){
+        ui->progressBar->hide();
+        QMessageBox::warning(this, "1", "LoginFailed");
+        qDebug() << "Failed: " << error;
+    });
 }

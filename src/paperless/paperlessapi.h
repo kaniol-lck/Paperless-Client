@@ -110,6 +110,8 @@ public:
     Reply<QString> login(const QUrl &url, const QString &username, const QString &password);
 
     Reply<bool> putDocument(int id, const Document &docNew, const Document &docOld);
+    Reply<bool> putDocument(int id, const QJsonObject &obj);
+    Reply<bool> postDocument(const QString &fileName, const QString &title = "", int correspondent = 0, int document_type = 0, int storage_path = 0);
 
     Reply<UiSettings> getUiSettings();
 
@@ -141,6 +143,7 @@ private:
     DEFINE_ENDPOINT(custom_fields)
     DEFINE_ENDPOINT(config)
     DEFINE_ENDPOINT(ui_settings)
+    static constexpr auto post_document = "/api/documents/post_document/";
 
     static constexpr auto bulk_edit = "/api/documents/bulk_edit/";
     static constexpr auto bulk_download = "/api/documents/bulk_download/";

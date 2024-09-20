@@ -9,13 +9,13 @@ DocumentModel::DocumentModel(QObject *parent, Paperless *client) :
 int DocumentModel::rowCount(const QModelIndex &parent) const
 {
     if(!inited_) return 0;
-    return list_.results.count();
+    return list_./*results.*/count();
 }
 
 QList<int> DocumentModel::customFieldList() const
 {
     QList<int> fieldList;
-    for(auto &&doc : list_.results)
+    for(auto &&doc : list_/*.results*/)
         for(auto &&field : doc.custom_fields)
             if(!fieldList.contains(field.field))
                 fieldList << field.field;
@@ -33,7 +33,7 @@ QVariant DocumentModel::data(const QModelIndex &index, int role) const
     if(!inited_) return QVariant();
     if (!index.isValid() || index.row() >= rowCount())
         return QVariant();
-    auto document = list_.results.at(index.row());
+    auto document = list_/*.results*/.at(index.row());
     switch (role) {
     case Qt::ToolTipRole:
     case Qt::DisplayRole:
@@ -100,7 +100,7 @@ QVariant DocumentModel::data(const QModelIndex &index, int role) const
 bool DocumentModel::setData(const QModelIndex &index, const QVariant &value, int role)
 {
     //reference
-    auto &doc = list_.results[index.row()];
+    auto &doc = list_/*.results*/[index.row()];
     auto docOld = doc;
 
     switch (index.column()) {
@@ -164,10 +164,18 @@ bool DocumentModel::setData(const QModelIndex &index, const QVariant &value, int
     return true;
 }
 
-void DocumentModel::setList(const ReturnList<Document> &newList)
+void DocumentModel::setList(const QList<Document> &newList)
 {
     beginResetModel();
     list_ = newList;
+    inited_ = true;
+    endResetModel();
+}
+
+void DocumentModel::appendList(const QList<Document> &newList)
+{
+    beginResetModel();
+    list_ << newList;
     inited_ = true;
     endResetModel();
 }
@@ -177,10 +185,10 @@ QList<int> DocumentModel::sectionList(const SavedView &view)
     //TODO: not same with others
     QList<QString> fieldList = {
         "id", /// no such field
+        "title",
         "correspondent",
         "documenttype",
         "storagepath",
-        "title",
         "content", /// no such field
         "tag",
         "created",
@@ -214,7 +222,7 @@ const Document &DocumentModel::documentAt(const QModelIndex &index)
 
 const Document &DocumentModel::documentAt(int row)
 {
-    return list_.results.at(row);
+    return list_/*.results*/.at(row);
 }
 
 QList<int> DocumentModel::documentsAt(QList<QModelIndex> rows)
@@ -233,7 +241,7 @@ QList<int> DocumentModel::documentsAt(QList<QModelIndex> rows)
 //     return list;
 // }
 
-ReturnList<Document> &DocumentModel::list()
+QList<Document> &DocumentModel::list()
 {
     return list_;
 }
@@ -244,6 +252,56 @@ QVariant DocumentModel::headerData(int section, Qt::Orientation orientation, int
     if(orientation != Qt::Horizontal)
         return QVariant();
     switch (role) {
+    case Qt::UserRole:
+        switch (section)
+        {
+        case IdColumn:
+            return "id";
+        case CorrespondentColumn:
+            return "correspondent";
+        case DocumentTypeColumn:
+            return "document_type";
+        case StoragePathColumn:
+            return "storage_path";
+        case TitleColumn:
+            return "title";
+        case ContentColumn:
+            return "content";
+        case TagsColumn:
+            return "tags";
+        case CreatedColumn:
+            return "created";
+        case CreatedDateColumn:
+            return "created_date";
+        case ModifiedColumn:
+            return "modified";
+        case AddedColumn:
+            return "added";
+        case DeletedAtColumn:
+            return "deleted_at";
+        case ArchiveSerialNumberColumn:
+            return "archive_serial_number";
+        case OriginalFileNameColumn:
+            return "original_file_name";
+        case ArchivedFileNameColumn:
+            return "archived_file_name";
+        case OwnerColumn:
+            return "owner";
+        case UserCanChangeColumn:
+            return "user_can_change";
+        case IsSharedByRequesterColumn:
+            return "is_shared_by_requester";
+        case NotesColumn:
+            return "notes";
+        default:
+            // case CustomFieldsColumn:
+            auto i = section - CustomFieldsColumn;
+            auto l = customFieldList();
+            if(i >= 0 && i < l.size()){
+                auto id = l.at(i);
+                return QString("custom_fields.%1").arg(id);
+            }
+        }
     case Qt::ToolTipRole:
     case Qt::DisplayRole:
         switch (section)
@@ -319,4 +377,212 @@ Qt::ItemFlags DocumentModel::flags(const QModelIndex &index) const
         return QAbstractTableModel::flags(index);
     else
         return QAbstractTableModel::flags(index) | Qt::ItemIsEditable;
+}
+
+QList<int> DocumentModel::headerOf(const QStringList &docAttr)
+{
+    QList<int> list;
+    for(auto &&str : docAttr){
+        int i = -1;
+        for(int col = 0; col < columnCount(); col++){
+            qDebug() << headerData(col, Qt::Horizontal, Qt::UserRole) << str;
+            if(headerData(col, Qt::Horizontal, Qt::UserRole) == str){
+                i = col;
+                break;
+            }
+        }
+        list <<  i;
+    }
+    //id
+    list[0] = 0;
+    return list;
+}
+
+Document DocumentModel::docOf(QList<int> header, const QStringList &docAttr)
+{
+    assert(header.count() == docAttr.count());
+    Document document;
+    for(int i = 0; i < header.size(); i++){
+        auto col = header.at(i);
+        auto str = docAttr.at(i);
+        switch (col)
+        {
+        case IdColumn:
+            document.id = str.toInt();
+            break;
+        case CorrespondentColumn:
+            document.correspondent = client_->fromCorrespondentName(str);
+            break;
+        case DocumentTypeColumn:
+            document.document_type = client_->fromDocumentTypeName(str);
+            break;
+        case StoragePathColumn:
+            document.storage_path = client_->fromStoragePathName(str);
+            break;
+        case TitleColumn:
+            document.title = str;
+        // case ContentColumn:
+        //     return document.content;
+            break;
+        case TagsColumn:{
+            // QStringList strList;
+            // for(auto id : document.tags)
+            //     strList << client_->getTagName(id);
+            // return strList.join(", ");
+            break;
+        }
+        break;
+        case CreatedColumn:
+            document.created = QDateTime::fromString(str);
+            break;
+        case CreatedDateColumn:
+            document.created_date = QDate::fromString(str);
+            break;
+        case ModifiedColumn:
+            document.modified = QDateTime::fromString(str);
+            break;
+        case AddedColumn:
+            document.added = QDateTime::fromString(str);
+            break;
+        case DeletedAtColumn:
+            document.deleted_at = QDateTime::fromString(str);
+            break;
+        case ArchiveSerialNumberColumn:
+            document.archive_serial_number = str.toInt();
+            break;
+        case OriginalFileNameColumn:
+            document.original_file_name = str;
+            break;
+        case ArchivedFileNameColumn:
+            document.archived_file_name = str;
+            break;
+        case OwnerColumn:
+            document.owner = client_->fromUserName(str);
+            break;
+        case UserCanChangeColumn:
+            document.user_can_change = str.toInt();
+            break;
+        case IsSharedByRequesterColumn:
+            document.is_shared_by_requester = str.toInt();
+            break;
+        case NotesColumn:
+            // document.notes = str.split(",");
+            break;
+        default:
+            // case CustomFieldsColumn:
+            auto ci = i - CustomFieldsColumn;
+            auto l = customFieldList();
+            if(ci >= 0 && ci < l.size()){
+                auto id = l.at(ci);
+                for(auto &&field : document.custom_fields)
+                    if(field.field == id) field.value = str;
+            }
+        }
+    }
+    return document;
+}
+
+QJsonObject DocumentModel::docJsonOf(QList<int> header, const QStringList &docAttr)
+{
+    assert(header.count() == docAttr.count());
+
+    QJsonObject object;
+    Document document;
+    for(int i = 0; i < header.size(); i++){
+        auto col = header.at(i);
+        auto str = docAttr.at(i);
+        switch (col)
+        {
+        case IdColumn:
+            document.id = str.toInt();
+            object.insert("id", document.id);
+            break;
+        case CorrespondentColumn:
+            document.correspondent = client_->fromCorrespondentName(str);
+            object.insert("correspondent", document.correspondent? document.correspondent : QJsonValue::Null);
+            break;
+        case DocumentTypeColumn:
+            document.document_type = client_->fromDocumentTypeName(str);
+            object.insert("document_type", document.document_type? document.document_type : QJsonValue::Null);
+            break;
+        case StoragePathColumn:
+            document.storage_path = client_->fromStoragePathName(str);
+            object.insert("storage_path", document.storage_path? document.storage_path : QJsonValue::Null);
+            break;
+        case TitleColumn:
+            document.title = str;
+            object.insert("title", document.title);
+            // case ContentColumn:
+            //     return document.content;
+            break;
+        case TagsColumn:{
+            // QJsonArray tagsArr;
+            // for(auto &&i : document.tags)
+            //     tagsArr.append(i);
+            // object.insert("tags", tagsArr);
+            // QStringList strList;
+            // for(auto id : document.tags)
+            //     strList << client_->getTagName(id);
+            // return strList.join(", ");
+            break;
+        }
+        break;
+        case CreatedColumn:
+            document.created = QDateTime::fromString(str);
+            object.insert("created", document.created.toUTC().toString(Qt::ISODateWithMs));
+            break;
+        case CreatedDateColumn:
+            document.created_date = QDate::fromString(str);
+            object.insert("created_date", document.created_date.toString(Qt::ISODate));
+            break;
+        case ModifiedColumn:
+            document.modified = QDateTime::fromString(str);
+            break;
+        case AddedColumn:
+            document.added = QDateTime::fromString(str);
+            break;
+        case DeletedAtColumn:
+            document.deleted_at = QDateTime::fromString(str);
+            break;
+        case ArchiveSerialNumberColumn:
+            document.archive_serial_number = str.toInt();
+            object.insert("archive_serial_number", document.archive_serial_number);
+            break;
+        case OriginalFileNameColumn:
+            document.original_file_name = str;
+            break;
+        case ArchivedFileNameColumn:
+            document.archived_file_name = str;
+            break;
+        case OwnerColumn:
+            document.owner = client_->fromUserName(str);
+            object.insert("owner", document.owner);
+            break;
+        case UserCanChangeColumn:
+            document.user_can_change = str.toInt();
+            break;
+        case IsSharedByRequesterColumn:
+            document.is_shared_by_requester = str.toInt();
+            break;
+        case NotesColumn:
+            // document.notes = str.split(",");
+            break;
+        default:
+            // case CustomFieldsColumn:
+            auto ci = i - CustomFieldsColumn;
+            auto l = customFieldList();
+            if(ci >= 0 && ci < l.size()){
+                auto id = l.at(ci);
+                for(auto &&field : document.custom_fields)
+                    if(field.field == id) field.value = str;
+            }
+            if(!document.custom_fields.isEmpty()){
+                QJsonArray custom_fieldsArr;
+                for(auto &&i : document.custom_fields)
+                    custom_fieldsArr.append(i.toJson());
+                object.insert("custom_fields", custom_fieldsArr);
+            }
+        }
+    }
+    return object;
 }

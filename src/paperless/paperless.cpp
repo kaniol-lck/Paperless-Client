@@ -10,6 +10,7 @@ Paperless::Paperless(QObject *parent) :
     api_->setAccount(AccountManager::manager()->currentAccount());
     connect(AccountManager::manager(), &AccountManager::currentAccountUpdated, this, [this]{
         api_->setAccount(AccountManager::manager()->currentAccount());
+        updateUiSettings();
     });
     connect(this, &Paperless::uiSettingsUpdated, this, [this]{
         auto reply = api_->getAppLogo(uiSettings_);

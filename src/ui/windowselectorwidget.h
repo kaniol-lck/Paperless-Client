@@ -3,8 +3,10 @@
 
 #include <QTreeView>
 
+class QToolButton;
+class ImageWidget;
 class QAbstractItemModel;
-class WindowSelectorWidget : public QTreeView
+class WindowSelectorWidget : public QWidget
 {
     Q_OBJECT
 public:
@@ -21,9 +23,19 @@ private slots:
 
 private:
     QAbstractItemModel *model_;
+    ImageWidget *logo_;
+    QTreeView *treeview_;
+    QToolButton *accountsBtn_;
+    QToolButton *settingsBtn_;
+
+    void setPage(int category, int page);
 
 protected:
     void paintEvent(QPaintEvent *event) override;
+
+    // QWidget interface
+protected:
+    void mousePressEvent(QMouseEvent *event) override;
 };
 
 #endif // WINDOWSELECTORWIDGET_H

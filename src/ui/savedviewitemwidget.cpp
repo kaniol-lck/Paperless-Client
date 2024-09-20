@@ -8,6 +8,7 @@ SavedViewItemWidget::SavedViewItemWidget(QWidget *parent, const QString &title, 
     ui->setupUi(this);
     ui->title->setText(title);
     ui->description->setText(subtitle);
+    ui->description->setWordWrap(true);
 }
 
 SavedViewItemWidget::~SavedViewItemWidget()

@@ -4,34 +4,35 @@
 #include <QFile>
 #include <QStandardItemModel>
 
-ImportCSVDialog::ImportCSVDialog(QWidget *parent, const QString &fileName):
+#include "documentmodel.h"
+#include "util/CSVHelper.hpp"
+#include "paperless/paperless.h"
+
+ImportCSVDialog::ImportCSVDialog(DocumentModel *model, QWidget *parent, Paperless *client, const QString &fileName):
     QDialog(parent),
     ui(new Ui::ImportCSVDialog),
+    client_(client),
+    docModel_(model),
     model_(new QStandardItemModel)
 {
     ui->setupUi(this);
-    ui->treeView->setModel(model_);
+    // ui->treeView->setModel(model_);
+    // for(auto &&v : fromCSV(fileName, 0, 2))
+    // {
+    //     list << Document::fromVariant(v);
+    // }
 
-    QFile file(fileName);
-    QTextStream in(&file);
-    if(!file.open(QIODevice::ReadOnly)) return;
-    QString line;
-    int lineCount = 0;
-    //TODO
-    while(in.readLineInto(&line)){
-        QList<QStandardItem *> items;
-        for(auto &&str : line.split(',')){
-            if(str.startsWith('"') && str.endsWith('"'))
-                str = str.mid(1, str.size() - 2);
-            items << new QStandardItem(str);
-        }
-        if(lineCount == 0){
-            for(int i = 0; i < items.count(); i++)
-                model_->setHorizontalHeaderItem(i, items.at(i));
-        } else
-            model_->appendRow(items);
-        lineCount++;
+    auto &&[headerLine, list] = fromCSVV(fileName, 0, 2);
+    auto header = docModel_->headerOf(headerLine);
+    for(auto &&i : list){
+        docList_ << docModel_->docOf(header, i);
+        docJsonList_ << docModel_->docJsonOf(header, i);
+        qDebug() << docModel_->docJsonOf(header, i);
     }
+
+    auto m = new DocumentModel(this, client_);
+    m->setList(docList_);
+    ui->treeView->setModel(m);
 
     fileValid_ = true;
 }
@@ -45,3 +46,24 @@ bool ImportCSVDialog::fileValid() const
 {
     return fileValid_;
 }
+
+void ImportCSVDialog::on_buttonBox_accepted()
+{
+    auto count = new int(0);
+    for(auto &&json : docJsonList_){
+        (*count)++;
+        client_->api()->putDocument(json.value("id").toInt(), json)
+            .setOnFinished(this, [count](bool success){
+            if(--(*count) == 0){
+                delete count;
+                qDebug() << "finished";
+            }
+        }, [count](auto){
+            if(--(*count) == 0){
+                delete count;
+                qDebug() << "finished";
+            }
+        });
+    }
+}
+

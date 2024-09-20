@@ -3,6 +3,8 @@
 
 #include <QMainWindow>
 
+
+class PreferencesHelper;
 namespace Ui {
 class SettingsWindow;
 }
@@ -15,8 +17,12 @@ public:
     explicit SettingsWindow(QWidget *parent = nullptr);
     ~SettingsWindow();
 
+signals:
+    void finished();
+
 private:
     Ui::SettingsWindow *ui;
+    PreferencesHelper *helper_;
 };
 
 #endif // SETTINGSWINDOW_H

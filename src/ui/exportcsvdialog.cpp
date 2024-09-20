@@ -39,16 +39,19 @@ void ExportCSVDialog::on_buttonBox_accepted()
     }
     QTextStream stream(&file);
     QList<int> list;
-    QStringList headerList;
-    headerList << "id";
+    QStringList headerList2, headerList1;
+    headerList1 << "id";
+    headerList2 << "id";
     for(int row = 0; row < ui->exportFields->count(); row++){
         auto item = ui->exportFields->item(row);
         if(item->checkState() == Qt::Unchecked) continue;
         int i = item->data(Qt::UserRole).toInt();
         list << i;
-        headerList << '"' + model_->headerData(i, Qt::Horizontal).toString() + '"';
+        headerList1 << '"' + model_->headerData(i, Qt::Horizontal, Qt::UserRole).toString() + '"';
+        headerList2 << '"' + model_->headerData(i, Qt::Horizontal).toString() + '"';
     }
-    stream << headerList.join(",") << Qt::endl;
+    stream << headerList1.join(",") << Qt::endl;
+    stream << headerList2.join(",") << Qt::endl;
     for(auto index : docIndexes_){
         auto doc = model_->documentAt(index);
         QStringList strList;

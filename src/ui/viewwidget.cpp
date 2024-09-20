@@ -8,6 +8,8 @@
 #include <QDesktopServices>
 #include <QFileDialog>
 #include <QLineEdit>
+#include <QScrollBar>
+#include <QSettings>
 #include <QToolButton>
 
 #include "documentmodel.h"
@@ -15,6 +17,8 @@
 #include "paperless/paperlessapi.h"
 #include "filtermenu.h"
 #include "exportcsvdialog.h"
+#include "accountmanager.h"
+#include "documentuploaddialog.h"
 
 ViewWidget::ViewWidget(QWidget *parent, Paperless *client, SavedView view) :
     QMainWindow(parent),
@@ -33,12 +37,23 @@ ViewWidget::ViewWidget(QWidget *parent, Paperless *client, SavedView view) :
     ui->tableView->setModel(model_);
     setWindowTitle(view_.name);
 
+    appendMode_ = QSettings().value("view/docListDisplay").toInt() == 0;
+
     connect(ui->treeView->selectionModel(), &QItemSelectionModel::selectionChanged, this, &ViewWidget::onSelectedChanged);
 
     // tool bar
-    ui->actionDownload->setIcon(QIcon::fromTheme(QIcon::ThemeIcon::DocumentSave));
-    ui->actionBulk_Download->setIcon(QIcon::fromTheme(QIcon::ThemeIcon::DocumentSave));
+    ui->actionUpload->setIcon(QIcon::fromTheme(QIcon::ThemeIcon::GoUp));
+    ui->actionDownload->setIcon(QIcon::fromTheme(QIcon::ThemeIcon::GoDown));
+    ui->actionBulk_Download->setIcon(QIcon::fromTheme(QIcon::ThemeIcon::GoDown));
     ui->actionEdit_Mode->setIcon(QIcon::fromTheme(QIcon::ThemeIcon::MailMessageNew));
+
+    connect(client_, &Paperless::uiSettingsUpdated, this,  [this]{
+        ui->actionEdit_Mode->setVisible(client_->currentUser().is_staff);
+    });
+
+    connect(AccountManager::manager(), &AccountManager::currentAccountUpdated, this, [this]{
+        search();
+    });
 
     // search bar
     ui->searchBar->insertWidget(ui->actionSearch, searchSelect_);
@@ -51,7 +66,7 @@ ViewWidget::ViewWidget(QWidget *parent, Paperless *client, SavedView view) :
     for(auto menu : filters_){
         ui->menuSearch->addAction(menu->menuAction());
         ui->filterBar->addWidget(filter2button(menu));
-        connect(menu, &FilterMenu::filterChanged, this, [=]{
+        connect(menu, &FilterMenu::filterChanged, this, [this]{
             search();
         });
     }
@@ -60,17 +75,32 @@ ViewWidget::ViewWidget(QWidget *parent, Paperless *client, SavedView view) :
     searchSelect_->addItem(tr("content"), "content__icontains");
     searchSelect_->addItem(tr("title & content"), "title_content");
 
+    if(appendMode_){
+        ui->pageBar->hide();
+        // ui->pageBar->setEnabled(false);
+        connect(ui->treeView->verticalScrollBar(), &QScrollBar::valueChanged, this, [this]{
+            if(ui->treeView->verticalScrollBar()->value() >= ui->treeView->verticalScrollBar()->maximum() * 0.9){
+                if(ui->actionNext_Page->isEnabled()){
+                    isNewSearch_ = false;
+                    search(++currentPage_);
+                }
+            }
+        });
+    }
+
     // page bar
     ui->pageBar->insertWidget(ui->actionNext_Page, pageSelect_);
     connect(pageSelect_, &QComboBox::currentIndexChanged, this, [this](int index){
         isNewSearch_ = false;
-        search(index + 1);
+        currentPage_ = index + 1;
+        search(currentPage_);
     });
     ui->actionPrevious_Page->setIcon(QIcon::fromTheme(QIcon::ThemeIcon::GoPrevious));
     ui->actionNext_Page->setIcon(QIcon::fromTheme(QIcon::ThemeIcon::GoNext));
 
     ui->treeView->setAlternatingRowColors(true);
     getDocs();
+
 }
 
 ViewWidget::ViewWidget(QWidget *parent, Paperless *client, CustomSavedView view) :
@@ -91,6 +121,9 @@ void ViewWidget::getDocs()
 
 void ViewWidget::search(int page)
 {
+    if(!ui->actionSearch->isEnabled()) return;
+    ui->actionSearch->setEnabled(false);
+    pageSelect_->setEnabled(false);
     QUrlQuery query;
     // page
     if(page > 1)
@@ -120,6 +153,8 @@ void ViewWidget::search(int page)
     //reply
     auto reply = client_->api()->getDocumentList(query);
     reply.setOnFinished(this, [this](auto &&list){
+        pageSelect_->setEnabled(true);
+        ui->actionSearch->setEnabled(true);
         setList(list);
     });
 }
@@ -152,7 +187,11 @@ void ViewWidget::setList(const ReturnList<Document> &list)
 {
     ui->treeView->selectionModel()->clearSelection();
     onSelectedChanged();
-    model_->setList(list);
+    if(appendMode_ && !isNewSearch_)
+        model_->appendList(list.results);
+    else{
+        model_->setList(list.results);
+    }
     ui->actionPrevious_Page->setEnabled(list.previous.isValid());
     ui->actionNext_Page->setEnabled(list.next.isValid());
     if(isNewSearch_){
@@ -161,6 +200,7 @@ void ViewWidget::setList(const ReturnList<Document> &list)
         for(int i = 1; i <= list.count / 25 + 1; i++){
             pageSelect_->addItem(tr("Page %1").arg(i));
         }
+        currentPage_ = 1;
         pageSelect_->blockSignals(false);
     }
     updateSections();
@@ -172,23 +212,25 @@ void ViewWidget::on_treeView_doubleClicked(const QModelIndex &index)
 {
     // auto dialog = new QDialog(this);
     auto document = model_->documentAt(index);
-    auto edit = new DocumentEdit(this);
-    edit->setClient(client_);
-    edit->setDocument(document);
-    edit->show();
+    // auto edit = new DocumentEdit(this);
+    // edit->setClient(client_);
+    // edit->setDocument(document);
+    // edit->show();
     // qDebug() << document.toJson();
-    // auto url = client_->api()->documentPreviewUrl(document);
-    // QDesktopServices::openUrl(url);
+    auto url = client_->api()->documentPreviewUrl(document);
+    QDesktopServices::openUrl(url);
 }
 
 void ViewWidget::on_actionPrevious_Page_triggered()
 {
     pageSelect_->setCurrentIndex(pageSelect_->currentIndex() - 1);
+    currentPage_--;
 }
 
 void ViewWidget::on_actionNext_Page_triggered()
 {
     pageSelect_->setCurrentIndex(pageSelect_->currentIndex() + 1);
+    currentPage_++;
 }
 
 void ViewWidget::on_actionSearch_triggered()
@@ -264,7 +306,7 @@ void ViewWidget::on_actionImport_CSV_triggered()
 {
     auto fileName = QFileDialog::getOpenFileName(this, tr("Select CSV file"), "", "*.csv");
     if(fileName.isEmpty()) return;
-    auto dialog = new ImportCSVDialog(this, fileName);
+    auto dialog = new ImportCSVDialog(model_, this, client_, fileName);
     dialog->show();
 }
 
@@ -284,6 +326,7 @@ auto n##_index = model_->index(row, DocumentModel::Type##Column); \
 if(show){ \
     if(ui->tableView->indexWidget(n##_index)) continue; \
     auto n##_cbbox = new QComboBox(this); \
+    n##_cbbox->addItem("n/a", 0); \
     for(auto &n : client_->n##List()) \
         n##_cbbox->addItem(n.name, n.id); \
     n##_cbbox->setCurrentText(client_->get##Type##Name(doc.n)); \
@@ -317,3 +360,13 @@ void ViewWidget::paintEvent(QPaintEvent *event)
 }
 
 #undef INDEX_WIDGET
+
+void ViewWidget::on_actionUpload_triggered()
+{
+    if(auto files = QFileDialog::getOpenFileNames(this, "Upload pdf...", "", "*.pdf");
+        !files.isEmpty()){
+        auto dialog = new DocumentUploadDialog(this, files, client_);
+        dialog->show();
+    }
+}
+

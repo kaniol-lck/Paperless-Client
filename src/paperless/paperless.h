@@ -26,9 +26,15 @@ void name##List##Updated();
 
 #define ID2NAME(Type, n) \
 QString get##Type##Name(int id) const{ \
-        for(auto &&v : n##List_) \
-        if(v.id == id) return v.name; \
-        return QString::number(id); \
+    for(auto &&v : n##List_) \
+    if(v.id == id) return v.name; \
+    if(id == 0) return ""; \
+    return QString::number(id); \
+} \
+int from##Type##Name(const QString &name) const{ \
+    for(auto &&v : n##List_) \
+        if(v.name == name) return v.id; \
+    return 0; \
 }
 
 class PaperlessApi;
@@ -62,7 +68,13 @@ public:
     QString getUserName(int id) const{
             for(auto &&v : userList_)
             if(v.id == id) return v.username;
+            if(id == 0) return "";
             return QString::number(id);
+    }
+    int fromUserName(const QString &username) const{
+        for(auto &&v : userList_)
+            if(v.username == username) return v.id;
+        return 0;
     }
     ID2NAME(Group, group);
 

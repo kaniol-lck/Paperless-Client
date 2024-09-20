@@ -3,6 +3,8 @@
 #include <QApplication>
 #include <QTranslator>
 
+#include "util/framelesswrapper.h"
+
 int main(int argc, char *argv[])
 {
     QApplication a(argc, argv);
@@ -26,6 +28,12 @@ int main(int argc, char *argv[])
     }
 
     Client w;
-    w.show();
+
+    auto frameless = new FramelessWrapper(&w);
+    frameless->setTitleBar(w.titleBar());
+    QObject::connect(&w, &Client::closed, frameless, &FramelessWrapper::close);
+    frameless->show();
+
+    // w.show();
     return a.exec();
 }

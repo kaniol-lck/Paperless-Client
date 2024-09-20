@@ -1,20 +1,55 @@
 #include "windowselectorwidget.h"
 #include "ui/pageswitcher.h"
 #include "ui/savedviewitemwidget.h"
+#include "util/imagewidget.h"
 
 #include <QLabel>
 #include <QListView>
+#include <QMouseEvent>
 #include <QTreeView>
 #include <QVBoxLayout>
+#include <QToolButton>
+#include <QSettings>
 
 WindowSelectorWidget::WindowSelectorWidget(QWidget *parent) :
-    QTreeView(parent)
+    logo_(new ImageWidget(this)),
+    treeview_(new QTreeView(parent)),
+    accountsBtn_(new QToolButton(this)),
+    settingsBtn_(new QToolButton(this))
 {
-    setRootIsDecorated(false);
-    setHeaderHidden(true);
-    setEditTriggers(QAbstractItemView::NoEditTriggers);
+    auto layout = new QVBoxLayout(this);
+    layout->setContentsMargins(0, 0, 0, 0);
+    layout->setSpacing(0);
+    setLayout(layout);
+    QImage logo(QSettings().value("ui/sideBarLogo").toString());
+    logo_->setImage(logo);
+    logo_->setMinimumHeight(60);
+    logo_->setMaximumHeight(60);
+    logo_->setMinimumWidth(200);
+    layout->addWidget(logo_);
+    layout->addWidget(treeview_);
 
-    setStyleSheet(R"(
+    auto layout2 = new QHBoxLayout;
+    layout->addLayout(layout2);
+    accountsBtn_->hide();
+    settingsBtn_->hide();
+    layout2->addWidget(accountsBtn_);
+    layout2->addWidget(settingsBtn_);
+
+    accountsBtn_->setText("Accounts");
+    connect(accountsBtn_, &QToolButton::clicked, this, [this]{
+        setPage(PageSwitcher::Settings, 0);
+    });
+    settingsBtn_->setText("Settings");
+    connect(settingsBtn_, &QToolButton::clicked, this, [this]{
+        setPage(PageSwitcher::Settings, 1);
+    });
+
+    treeview_->setRootIsDecorated(false);
+    treeview_->setHeaderHidden(true);
+    treeview_->setEditTriggers(QAbstractItemView::NoEditTriggers);
+
+    treeview_->setStyleSheet(R"(
 * {
   outline:0px;
 }
@@ -25,32 +60,34 @@ QTreeView {
 }
 
 QLabel {
-  background-color: transparent;
   color: whitesmoke;
 }
 
+QTreeView::branch:selected {
+  border-right: 3px solid #4ae;
+}
+
 QTreeView::item:selected {
-  border-left: 3px solid #4ae;
+  color: whitesmoke;
   background-color: #444;
-  color: transparent;
 }
 
 )");
-
 }
 
 void WindowSelectorWidget::setModel(QAbstractItemModel *model)
 {
     model_ = model;
-    QTreeView::setModel(model);
-    setRootIndex(model_->index(PageSwitcher::View, 0));
-    connect(selectionModel(), &QItemSelectionModel::currentRowChanged, this, &WindowSelectorWidget::onCurrentRowChanged);
-    expandAll();
+    treeview_->setModel(model);
+    if(QSettings().value("ui/viewPageOnly").toBool())
+        treeview_->setRootIndex(model_->index(PageSwitcher::View, 0));
+    connect(treeview_->selectionModel(), &QItemSelectionModel::currentRowChanged, this, &WindowSelectorWidget::onCurrentRowChanged);
+    treeview_->expandAll();
 }
 
 void WindowSelectorWidget::setCurrentIndex(const QModelIndex &modelIndex)
 {
-    QTreeView::setCurrentIndex(modelIndex);
+    treeview_->setCurrentIndex(modelIndex);
 }
 
 void WindowSelectorWidget::onCurrentRowChanged(const QModelIndex &current, const QModelIndex &previous)
@@ -59,11 +96,16 @@ void WindowSelectorWidget::onCurrentRowChanged(const QModelIndex &current, const
         emit windowChanged(parent.row(), current.row());
 }
 
+void WindowSelectorWidget::setPage(int category, int page)
+{
+    setCurrentIndex(model_->index(page, 0, model_->index(category, 0)));
+}
+
 void WindowSelectorWidget::paintEvent(QPaintEvent *event)
 {
-    auto beginRow = indexAt(QPoint(0, 0)).row();
+    auto beginRow = treeview_->indexAt(QPoint(0, 0)).row();
     if(beginRow < 0) return;
-    auto endRow = indexAt(QPoint(0, height())).row();
+    auto endRow = treeview_->indexAt(QPoint(0, height())).row();
     if(endRow < 0)
         endRow = model_->rowCount(model_->index(PageSwitcher::View, 0)) - 1;
     else
@@ -73,12 +115,17 @@ void WindowSelectorWidget::paintEvent(QPaintEvent *event)
         bool show = row >= beginRow && row <= endRow;
         auto index = model_->index(row, 0, model_->index(PageSwitcher::View, 0));
         if(show){
-            if(indexWidget(index)) continue;
+            if(treeview_->indexWidget(index)) continue;
             auto text = model_->data(index).toString();
+            model_->setData(index, {}, Qt::DisplayRole);
             auto description = model_->data(index, Qt::UserRole + 2).toString();
             auto widget = new SavedViewItemWidget(this, text, description);
-            setIndexWidget(index, widget);
+            treeview_->setIndexWidget(index, widget);
         }
     }
-    QTreeView::paintEvent(event);
+}
+
+void WindowSelectorWidget::mousePressEvent(QMouseEvent *event)
+{
+    setPage(PageSwitcher::Main, 0);
 }

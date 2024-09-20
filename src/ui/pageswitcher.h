@@ -35,6 +35,8 @@ public:
     QStandardItemModel *model();
 
 signals:
+    void syncFinished();
+
     void pageChanged(QModelIndex modelIndex);
     void windowChanged(QMainWindow *previous, QMainWindow *current);
 

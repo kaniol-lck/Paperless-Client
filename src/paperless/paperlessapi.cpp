@@ -5,6 +5,10 @@
 #include <QJsonObject>
 #include <QSettings>
 #include <QJsonArray>
+#include <QHttpMultiPart>
+#include <QFile>
+#include <QMimeData>
+#include <QFileInfo>
 
 #include "qpixmap.h"
 #include "util/util.hpp"
@@ -100,14 +104,50 @@ Reply<QString> PaperlessApi::login(const QUrl &url, const QString &username, con
 Reply<bool> PaperlessApi::putDocument(int id, const Document &docNew, const Document &docOld)
 {
     auto obj = docNew.toJsonNew(docOld);
+    return putDocument(id, obj);
+}
+
+Reply<bool> PaperlessApi::putDocument(int id, const QJsonObject &obj)
+{
     auto data = QJsonDocument(obj).toJson(QJsonDocument::Compact);
     qDebug() << data;
     auto request = api_.createRequest(documents + QString("%1/").arg(id));
+    request.setHeader(QNetworkRequest::ContentTypeHeader, "application/json");
     return { manager_.put(request, data), [](auto r){
-                QRestReply reply(r);
-                // qDebug() << reply.readJson();
-                return true;
-            }
+            QRestReply reply(r);
+            qDebug() << reply.readJson();
+            return true;
+        }
+    };
+}
+
+Reply<bool> PaperlessApi::postDocument(const QString &filePath, const QString &title, int correspondent, int document_type, int storage_path)
+{
+    auto data = new QHttpMultiPart(QHttpMultiPart::MixedType, this);
+    QHttpPart docPart, titlePart, correspondentPart, document_typePart, storage_pathPart;
+    auto f = new QFile(filePath, data);
+    f->open(QIODevice::ReadOnly);
+    QString fileName = title.isEmpty()? QFileInfo(filePath).fileName() : title;
+    docPart.setHeader(QNetworkRequest::ContentTypeHeader, QVariant("application/pdf"));
+    // QString t)
+    docPart.setHeader(QNetworkRequest::ContentDispositionHeader, QString("form-data; name=\"document\";filename=\"%1\"").arg(fileName));
+    docPart.setBodyDevice(f);
+    data->append(docPart);
+    docPart.setHeader(QNetworkRequest::ContentDispositionHeader, QVariant("form-data; name=\"correspondent\""));
+    correspondentPart.setBody(QByteArray::number(correspondent));
+    data->append(correspondentPart);
+    docPart.setHeader(QNetworkRequest::ContentDispositionHeader, QVariant("form-data; name=\"document_type\""));
+    document_typePart.setBody(QByteArray::number(document_type));
+    data->append(document_typePart);
+    docPart.setHeader(QNetworkRequest::ContentDispositionHeader, QVariant("form-data; name=\"storage_path\""));
+    storage_pathPart.setBody(QByteArray::number(storage_path));
+    data->append(storage_pathPart);
+    auto request = api_.createRequest(post_document);
+    data->setContentType(QHttpMultiPart::FormDataType);
+    return { manager_.post(request, data), [](auto r){
+            // QRestReply reply(r);
+            return true;
+        }
     };
 }
 
@@ -132,7 +172,7 @@ void PaperlessApi::setAccount(const Account &newAccount)
 
     QHttpHeaders headers;
     headers.append("Authorization", "Token " + account_.token);
-    headers.append(QHttpHeaders::WellKnownHeader::ContentType, "application/json");
+    // headers.append(QHttpHeaders::WellKnownHeader::ContentType, "application/json");
     api_.clearCommonHeaders();
     api_.setCommonHeaders(headers);
 }

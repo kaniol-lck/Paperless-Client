@@ -98,7 +98,7 @@
      <x>0</x>
      <y>0</y>
      <width>800</width>
-     <height>25</height>
+     <height>26</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuSearch">
@@ -111,8 +111,11 @@
     <property name="title">
      <string>File</string>
     </property>
+    <addaction name="actionUpload"/>
+    <addaction name="separator"/>
     <addaction name="actionImport_CSV"/>
     <addaction name="actionExport_CSV"/>
+    <addaction name="separator"/>
     <addaction name="actionPreview"/>
     <addaction name="actionDownload"/>
     <addaction name="actionBulk_Download"/>
@@ -120,7 +123,6 @@
    <addaction name="menuFile"/>
    <addaction name="menuSearch"/>
   </widget>
-  <widget class="QStatusBar" name="statusbar"/>
   <widget class="QToolBar" name="pageBar">
    <property name="windowTitle">
     <string>toolBar</string>
@@ -177,6 +179,7 @@
     <bool>true</bool>
    </attribute>
    <addaction name="actionPreview"/>
+   <addaction name="actionUpload"/>
    <addaction name="actionDownload"/>
    <addaction name="actionBulk_Download"/>
    <addaction name="actionEdit_Mode"/>
@@ -272,6 +275,11 @@
    </property>
    <property name="menuRole">
     <enum>QAction::MenuRole::NoRole</enum>
+   </property>
+  </action>
+  <action name="actionUpload">
+   <property name="text">
+    <string>Upload</string>
    </property>
   </action>
  </widget>
