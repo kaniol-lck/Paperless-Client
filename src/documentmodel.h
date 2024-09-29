@@ -62,6 +62,7 @@ public:
 
     QList<Document> &list();
 
+    Paperless *client() const;
 
 private:
     QList<Document> list_;

@@ -248,6 +248,11 @@ QList<Document> &DocumentModel::list()
     return list_;
 }
 
+Paperless *DocumentModel::client() const
+{
+    return client_;
+}
+
 QVariant DocumentModel::headerData(int section, Qt::Orientation orientation, int role) const
 {
     if(!inited_) return QVariant();

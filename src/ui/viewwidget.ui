@@ -119,6 +119,7 @@
     <addaction name="separator"/>
     <addaction name="actionImport_CSV"/>
     <addaction name="actionExport_CSV"/>
+    <addaction name="actionExport_CSV_for_All"/>
     <addaction name="separator"/>
     <addaction name="actionPreview"/>
     <addaction name="actionDownload"/>
@@ -253,7 +254,10 @@
   </action>
   <action name="actionExport_CSV">
    <property name="text">
-    <string>Export CSV</string>
+    <string>Export CSV for Selected</string>
+   </property>
+   <property name="toolTip">
+    <string>Export CSV for Selected</string>
    </property>
    <property name="menuRole">
     <enum>QAction::MenuRole::NoRole</enum>
@@ -284,6 +288,17 @@
   <action name="actionUpload">
    <property name="text">
     <string>Upload</string>
+   </property>
+  </action>
+  <action name="actionExport_CSV_for_All">
+   <property name="text">
+    <string>Export CSV for All</string>
+   </property>
+   <property name="toolTip">
+    <string>Export CSV for All</string>
+   </property>
+   <property name="menuRole">
+    <enum>QAction::MenuRole::NoRole</enum>
    </property>
   </action>
  </widget>

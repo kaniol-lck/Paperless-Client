@@ -127,11 +127,23 @@ void ViewWidget::search(int page)
     if(!ui->actionSearch->isEnabled()) return;
     ui->actionSearch->setEnabled(false);
     pageSelect_->setEnabled(false);
+
+    //reply
+    auto reply = searchReply(Config::config()->view_docCountPerPage.get(), page);
+    reply.setOnFinished(this, [this](auto &&list){
+        pageSelect_->setEnabled(true);
+        ui->actionSearch->setEnabled(true);
+        setList(list);
+    });
+}
+
+Reply<ReturnList<Document> > ViewWidget::searchReply(int page_size, int page)
+{
     QUrlQuery query;
     // page
     if(page > 1)
         query.addQueryItem("page", QString::number(page));
-    query.addQueryItem("page_size", QString::number(Config::config()->view_docCountPerPage.get()));
+    query.addQueryItem("page_size", QString::number(page_size));
 
     // search
     auto searchKey = searchSelect_->currentData().toString();
@@ -152,15 +164,8 @@ void ViewWidget::search(int page)
         else
             query.addQueryItem("ordering", "-" + view_.sort_field);
     }
-
     // qDebug() << query.toString();
-    //reply
-    auto reply = client_->api()->getDocumentList(query);
-    reply.setOnFinished(this, [this](auto &&list){
-        pageSelect_->setEnabled(true);
-        ui->actionSearch->setEnabled(true);
-        setList(list);
-    });
+    return client_->api()->getDocumentList(query);
 }
 
 SavedView ViewWidget::view() const
@@ -189,6 +194,8 @@ void ViewWidget::updateSections()
 
 void ViewWidget::setList(const ReturnList<Document> &list)
 {
+    all_ = list.all;
+
     ui->treeView->selectionModel()->clearSelection();
     onSelectedChanged();
     if(appendMode_ && !isNewSearch_)
@@ -295,9 +302,17 @@ void ViewWidget::on_actionBulk_Download_triggered()
 
 void ViewWidget::on_actionExport_CSV_triggered()
 {
-    auto indexes = ui->treeView->selectionModel()->selectedRows();
+    QList<Document> docList;
+    for(auto index : ui->treeView->selectionModel()->selectedRows()){
+        docList << model_->documentAt(index);
+    }
+    auto dialog = new ExportCSVDialog(this, client_, view_, docList);
+    dialog->show();
+}
 
-    auto dialog = new ExportCSVDialog(model_, view_, ui->treeView->selectionModel()->selectedRows(), this);
+void ViewWidget::on_actionExport_CSV_for_All_triggered()
+{
+    auto dialog = new ExportCSVDialog(this, client_, view_, searchReply(10000));
     dialog->show();
 }
 

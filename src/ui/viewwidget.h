@@ -5,6 +5,7 @@
 #include "paperless/Document.h"
 #include "paperless/ReturnList.hpp"
 #include "paperless/SavedView.h"
+#include "util/reply.hpp"
 #include <QMainWindow>
 
 class Paperless;
@@ -54,6 +55,8 @@ private slots:
 
     void on_actionUpload_triggered();
 
+    void on_actionExport_CSV_for_All_triggered();
+
 private:
     Ui::ViewWidget *ui;
     QComboBox *searchSelect_;
@@ -68,8 +71,10 @@ private:
     bool isNewSearch_ = true;
     QList<int> selectedDocs_;
     QString description_;
+    QList<int> all_;
 
     QToolButton *filter2button(FilterMenu *filter);
+    Reply<ReturnList<Document>> searchReply(int page_size, int page = 1);
 
     bool appendMode_;
     // QWidget interface
