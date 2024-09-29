@@ -37,6 +37,7 @@ WindowsTitleBar::WindowsTitleBar(QWidget *parent, QMenuBar *menuBar) :
     };
     updateWindowIcon();
     connect(parent, &QWidget::windowIconChanged, this, updateWindowIcon);
+    setFixedHeight(36);
 }
 
 WindowsTitleBar::~WindowsTitleBar()
@@ -54,18 +55,20 @@ void WindowsTitleBar::updateMenuBar()
     if(menuBar_){
         ui->verticalLayout->addWidget(menuBar_);
         // I don't know why 5px + 31px, but it works!
-        menuBar_->setStyleSheet("QMenuBar {background-color: transparent; margin-bottom: 5px; min-height:31px;}");
+        // menuBar_->setStyleSheet("QMenuBar {background-color: transparent;margin-top: 10px; border: 1px solid red; min-height:60px;}");
     }
 }
 
 void WindowsTitleBar::setMaximumed()
 {
     ui->maxButton->setIcon(QApplication::style()->standardIcon(QStyle::SP_TitleBarNormalButton));
+    setFixedHeight(32);
 }
 
 void WindowsTitleBar::setNormal()
 {
     ui->maxButton->setIcon(QApplication::style()->standardIcon(QStyle::SP_TitleBarMaxButton));
+    setFixedHeight(42);
 }
 
 void WindowsTitleBar::paintEvent(QPaintEvent *event)
@@ -85,11 +88,11 @@ void WindowsTitleBar::on_maxButton_clicked()
 {
     if (parentWidget_->isMaximized()){
         parentWidget_->showNormal();
-        ui->maxButton->setIcon(QApplication::style()->standardIcon(QStyle::SP_TitleBarMaxButton));
+        setNormal();
     }
     else{
         parentWidget_->showMaximized();
-        ui->maxButton->setIcon(QApplication::style()->standardIcon(QStyle::SP_TitleBarNormalButton));
+        setMaximumed();
     }
 }
 

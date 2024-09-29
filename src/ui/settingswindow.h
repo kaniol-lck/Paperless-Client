@@ -3,8 +3,6 @@
 
 #include <QMainWindow>
 
-
-class PreferencesHelper;
 namespace Ui {
 class SettingsWindow;
 }
@@ -22,7 +20,6 @@ signals:
 
 private:
     Ui::SettingsWindow *ui;
-    PreferencesHelper *helper_;
 };
 
 #endif // SETTINGSWINDOW_H

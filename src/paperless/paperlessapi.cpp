@@ -3,7 +3,6 @@
 #include <QRestReply>
 #include <QJsonDocument>
 #include <QJsonObject>
-#include <QSettings>
 #include <QJsonArray>
 #include <QHttpMultiPart>
 #include <QFile>

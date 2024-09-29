@@ -3,13 +3,13 @@
 #include "ui_client.h"
 
 #include "accountwindow.h"
+#include "config.h"
 #include "settingswindow.h"
 #include "logindialog.h"
 #include "viewwidget.h"
 #include "pageswitcher.h"
 
 #include <QLabel>
-#include <QSettings>
 #include <QSplitter>
 #include <QVBoxLayout>
 #include <QWidgetAction>
@@ -64,7 +64,7 @@ QTreeView::item {
     connect(pageSwitcher_, &PageSwitcher::pageChanged, this, &Client::mergeMenuBar);
     connect(pageSwitcher_, &PageSwitcher::syncFinished, this, &Client::updateViewList);
 
-    if(QSettings().value("ui/welcomePage").toBool())
+    if(Config::config()->ui_welcomePage.get())
         pageSwitcher_->addMainPage();
     pageSwitcher_->addDocumentsPage();
 
@@ -125,6 +125,12 @@ void Client::mergeMenuBar()
                 menu->addActions(menuAction->menu()->actions());
             }
         }
+
+    for(auto &&menuAction : ui->menubar->actions()){
+        if(auto menu = menuAction->menu();
+            menu->isEmpty())
+            ui->menubar->removeAction(menuAction);
+    }
 }
 
 void Client::updateViewList()

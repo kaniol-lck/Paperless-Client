@@ -19,9 +19,7 @@ void ImageWidget::paintEvent(QPaintEvent *event)
     re.translate((width() - image2.width()) / 2 * r,
                  (height() - image2.height()) / 2 * r);
 
-    painter.fillRect(rect(), QColor("#333"));
     painter.drawImage(re, image_);
-    QWidget::paintEvent(event);
 }
 
 void ImageWidget::setImage(const QImage &newImage)

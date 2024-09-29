@@ -1,0 +1,43 @@
+#include "config.h"
+
+Config::Config(QObject *parent)
+    : AppConfig{parent}
+{
+    ui.setName(tr("User Interface"));
+    ui_welcomePage.setName(tr("Enable welcome page"));
+    ui_sideBarLogo.setName(tr("Side bar logo path"));
+    ui_welcomePageImagePath.setName(tr("Welcome page image path"));
+    ui_showViewPagesOnly.setName(tr("Show view pages only"));
+
+    view.setName(tr("Views"));
+    view_docListDisplay.setName(tr("Document list display type"));
+    view_docCountPerPage.setName(tr("Document numbers per page"));
+
+    view_toolBar.setName(tr("Tool Bar"));
+    view_toolBar_showSearchBar.setName(tr("Show Search Bar"));
+    view_toolBar_showFilterBar.setName(tr("Show Filter Bar"));
+    view_toolBar_showToolBar.setName(tr("Show Tool Bar"));
+    view_toolBar_showPageBar.setName(tr("Show Page Bar"));
+
+    auto imageFilePathConfig = std::make_shared<FilePathConfig>(tr("Select a image file."), tr("Images (*.png *.jpg *.jpeg)"));
+    ui_sideBarLogo.setWidgetConfig(imageFilePathConfig);
+    ui_welcomePageImagePath.setWidgetConfig(imageFilePathConfig);
+
+    auto docListDisplayConfig = std::make_shared<ComboBoxConfig>(QStringList{
+        tr("Unified"),
+        tr("Pagination"),
+    });
+    view_docListDisplay.setWidgetConfig(docListDisplayConfig);
+    auto spinBoxConfig = std::make_shared<SpinBoxConfig>();
+    spinBoxConfig->setAttr([](auto *widget){
+        QSpinBox *spinBox = qobject_cast<QSpinBox*>(widget);
+        spinBox->setMinimum(1);
+        spinBox->setMaximum(25);
+    });
+    view_docCountPerPage.setWidgetConfig(spinBoxConfig);
+}
+
+Config *Config::config(){
+    static Config c;
+    return &c;
+}

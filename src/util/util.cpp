@@ -56,3 +56,12 @@ void openFileInFolder(const QString &fileName, const QString &filePath)
     else
         openFileInFolder(QDir(filePath).absoluteFilePath(fileName));
 }
+
+QIcon reverseIcon(const QIcon &icon, int extent)
+{
+    auto pixmap = icon.pixmap(extent, QIcon::Mode::Selected);
+    QIcon reversed(pixmap);
+    auto pixmap2 =  icon.pixmap(extent);
+    reversed.addPixmap(pixmap2, QIcon::Mode::Selected);
+    return reversed;
+}

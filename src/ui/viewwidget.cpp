@@ -1,5 +1,6 @@
 #include "viewwidget.h"
 #include "bulkdownloaddialog.h"
+#include "config.h"
 #include "ui/documentedit.h"
 #include "ui/importcsvdialog.h"
 #include "ui_viewwidget.h"
@@ -9,7 +10,6 @@
 #include <QFileDialog>
 #include <QLineEdit>
 #include <QScrollBar>
-#include <QSettings>
 #include <QToolButton>
 
 #include "documentmodel.h"
@@ -35,9 +35,10 @@ ViewWidget::ViewWidget(QWidget *parent, Paperless *client, SavedView view) :
     // ui->documentEdit->setClient(client_);
     ui->treeView->setModel(model_);
     ui->tableView->setModel(model_);
+    ui->treeView->header()->setMinimumHeight(48);
     setWindowTitle(view_.name);
 
-    appendMode_ = QSettings().value("view/docListDisplay").toInt() == 0;
+    appendMode_ = Config::config()->view_docListDisplay.get() == 0;
 
     connect(ui->treeView->selectionModel(), &QItemSelectionModel::selectionChanged, this, &ViewWidget::onSelectedChanged);
 
@@ -101,6 +102,8 @@ ViewWidget::ViewWidget(QWidget *parent, Paperless *client, SavedView view) :
     ui->treeView->setAlternatingRowColors(true);
     getDocs();
 
+    connect(Config::config()->view_toolBar.listener(), &ConfigListener::configChanged, this, &ViewWidget::setupToolBar);
+    setupToolBar();
 }
 
 ViewWidget::ViewWidget(QWidget *parent, Paperless *client, CustomSavedView view) :
@@ -128,6 +131,7 @@ void ViewWidget::search(int page)
     // page
     if(page > 1)
         query.addQueryItem("page", QString::number(page));
+    query.addQueryItem("page_size", QString::number(Config::config()->view_docCountPerPage.get()));
 
     // search
     auto searchKey = searchSelect_->currentData().toString();
@@ -204,19 +208,14 @@ void ViewWidget::setList(const ReturnList<Document> &list)
         pageSelect_->blockSignals(false);
     }
     updateSections();
-    ui->treeView->header()->resizeSections(QHeaderView::ResizeToContents);
+    // ui->treeView->header()->resizeSections(QHeaderView::ResizeToContents);
     isNewSearch_ = true;
 }
 
 void ViewWidget::on_treeView_doubleClicked(const QModelIndex &index)
 {
-    // auto dialog = new QDialog(this);
+    if(ui->actionEdit_Mode->isChecked()) return;
     auto document = model_->documentAt(index);
-    // auto edit = new DocumentEdit(this);
-    // edit->setClient(client_);
-    // edit->setDocument(document);
-    // edit->show();
-    // qDebug() << document.toJson();
     auto url = client_->api()->documentPreviewUrl(document);
     QDesktopServices::openUrl(url);
 }
@@ -310,10 +309,24 @@ void ViewWidget::on_actionImport_CSV_triggered()
     dialog->show();
 }
 
-
 void ViewWidget::on_actionEdit_Mode_toggled(bool arg1)
 {
-    ui->stackedWidget->setCurrentIndex(arg1? 1 : 0);
+    if(arg1){
+        ui->treeView->setEditTriggers(QAbstractItemView::DoubleClicked |
+                                      QAbstractItemView::EditKeyPressed |
+                                      QAbstractItemView::AnyKeyPressed);
+    } else{
+        ui->treeView->setEditTriggers(QAbstractItemView::NoEditTriggers);
+    }
+    // ui->stackedWidget->setCurrentIndex(arg1? 1 : 0);
+}
+
+void ViewWidget::setupToolBar()
+{
+    ui->searchBar->setVisible(Config::config()->view_toolBar_showSearchBar.get());
+    ui->filterBar->setVisible(Config::config()->view_toolBar_showFilterBar.get());
+    ui->toolBar->setVisible(Config::config()->view_toolBar_showToolBar.get());
+    ui->pageBar->setVisible(Config::config()->view_toolBar_showPageBar.get());
 }
 
 QString ViewWidget::description() const
@@ -324,7 +337,7 @@ QString ViewWidget::description() const
 #define INDEX_WIDGET(Type, n) \
 auto n##_index = model_->index(row, DocumentModel::Type##Column); \
 if(show){ \
-    if(ui->tableView->indexWidget(n##_index)) continue; \
+    if(ui->treeView->indexWidget(n##_index)) continue; \
     auto n##_cbbox = new QComboBox(this); \
     n##_cbbox->addItem("n/a", 0); \
     for(auto &n : client_->n##List()) \
@@ -333,17 +346,17 @@ if(show){ \
     connect(n##_cbbox, &QComboBox::currentIndexChanged, this, [=]{ \
         model_->setData(n##_index, n##_cbbox->currentData(), Qt::EditRole); \
     }); \
-    ui->tableView->setIndexWidget(n##_index, n##_cbbox); \
-} else if(auto widget = ui->tableView->indexWidget(n##_index)){ \
-    ui->tableView->setIndexWidget(n##_index, nullptr); \
+    ui->treeView->setIndexWidget(n##_index, n##_cbbox); \
+} else if(auto widget = ui->treeView->indexWidget(n##_index)){ \
+    ui->treeView->setIndexWidget(n##_index, nullptr); \
     delete widget; \
 }
 
 void ViewWidget::paintEvent(QPaintEvent *event)
 {
-    auto beginRow = ui->tableView->indexAt(QPoint(0, 0)).row();
+    auto beginRow = ui->treeView->indexAt(QPoint(0, 0)).row();
     if(beginRow < 0) return;
-    auto endRow = ui->tableView->indexAt(QPoint(0, ui->tableView->height())).row();
+    auto endRow = ui->treeView->indexAt(QPoint(0, ui->treeView->height())).row();
     if(endRow < 0)
         endRow = model_->rowCount() - 1;
     else
@@ -351,6 +364,7 @@ void ViewWidget::paintEvent(QPaintEvent *event)
         endRow += 2;
     for(int row = 0; row < model_->rowCount(); row++){
         bool show = row >= beginRow && row <= endRow;
+        if(!ui->actionEdit_Mode->isChecked()) show = false;
         auto doc = model_->documentAt(row);
         INDEX_WIDGET(Correspondent, correspondent);
         INDEX_WIDGET(DocumentType, document_type);

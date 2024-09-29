@@ -20,6 +20,7 @@ signals:
 
 private slots:
     void onCurrentRowChanged(const QModelIndex &current, const QModelIndex &previous);
+    void setupRootIndex();
 
 private:
     QAbstractItemModel *model_;

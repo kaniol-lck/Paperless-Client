@@ -1,0 +1,3 @@
+[submodule "AppConfig"]
+	path = AppConfig
+	url = git@github.com:kaniol-lck/AppConfig.git

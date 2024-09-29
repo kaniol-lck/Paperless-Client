@@ -3,6 +3,7 @@
 
 #include <QMainWindow>
 
+class QPushButton;
 namespace Ui {
 class MainPageWindow;
 }
@@ -15,13 +16,12 @@ public:
     explicit MainPageWindow(QWidget *parent = nullptr);
     ~MainPageWindow();
 
-private:
-    Ui::MainPageWindow *ui;
-
-    // QWidget interface
 protected:
     void paintEvent(QPaintEvent *event) override;
-    // void resizeEvent(QResizeEvent *event) override;
+
+private:
+    Ui::MainPageWindow *ui;
+    QPushButton *button_;
 };
 
 #endif // MAINPAGEWINDOW_H

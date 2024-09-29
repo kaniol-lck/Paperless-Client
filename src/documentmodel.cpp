@@ -1,5 +1,7 @@
 #include "documentmodel.h"
 #include "paperless/paperless.h"
+#include "qapplication.h"
+#include "qfont.h"
 
 DocumentModel::DocumentModel(QObject *parent, Paperless *client) :
     QAbstractTableModel(parent),
@@ -252,6 +254,16 @@ QVariant DocumentModel::headerData(int section, Qt::Orientation orientation, int
     if(orientation != Qt::Horizontal)
         return QVariant();
     switch (role) {
+    // case Qt::TextAlignmentRole:
+        // return Qt::AlignCenter;
+    case Qt::FontRole:{
+        auto font = qApp->font();
+        font.setStyleStrategy(QFont::PreferAntialias);
+        font.setBold(true);
+        // font.setPointSize(12);
+        font.setLetterSpacing(QFont::AbsoluteSpacing, 1.5);
+        return font;
+    }
     case Qt::UserRole:
         switch (section)
         {

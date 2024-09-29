@@ -1,7 +1,9 @@
 #include "windowselectorwidget.h"
+#include "config.h"
 #include "ui/pageswitcher.h"
 #include "ui/savedviewitemwidget.h"
 #include "util/imagewidget.h"
+#include "util/util.h"
 
 #include <QLabel>
 #include <QListView>
@@ -9,7 +11,8 @@
 #include <QTreeView>
 #include <QVBoxLayout>
 #include <QToolButton>
-#include <QSettings>
+#include <QPainter>
+#include <QTimer>
 
 WindowSelectorWidget::WindowSelectorWidget(QWidget *parent) :
     logo_(new ImageWidget(this)),
@@ -21,7 +24,7 @@ WindowSelectorWidget::WindowSelectorWidget(QWidget *parent) :
     layout->setContentsMargins(0, 0, 0, 0);
     layout->setSpacing(0);
     setLayout(layout);
-    QImage logo(QSettings().value("ui/sideBarLogo").toString());
+    QImage logo(Config::config()->ui_sideBarLogo.get());
     logo_->setImage(logo);
     logo_->setMinimumHeight(60);
     logo_->setMaximumHeight(60);
@@ -31,10 +34,15 @@ WindowSelectorWidget::WindowSelectorWidget(QWidget *parent) :
 
     auto layout2 = new QHBoxLayout;
     layout->addLayout(layout2);
-    accountsBtn_->hide();
-    settingsBtn_->hide();
-    layout2->addWidget(accountsBtn_);
-    layout2->addWidget(settingsBtn_);
+
+    accountsBtn_->setIcon(reverseIcon(QIcon::fromTheme(QIcon::ThemeIcon::UserAvailable)));
+    settingsBtn_->setIcon(reverseIcon(QIcon::fromTheme(QIcon::ThemeIcon::DocumentProperties)));
+    QSizePolicy sizePolicy(QSizePolicy::Policy::Expanding, QSizePolicy::Policy::Preferred);
+    for(auto  btn : { accountsBtn_, settingsBtn_ }){
+        btn->setSizePolicy(sizePolicy);
+        btn->setToolButtonStyle(Qt::ToolButtonIconOnly);
+        layout2->addWidget(btn);
+    }
 
     accountsBtn_->setText("Accounts");
     connect(accountsBtn_, &QToolButton::clicked, this, [this]{
@@ -48,18 +56,19 @@ WindowSelectorWidget::WindowSelectorWidget(QWidget *parent) :
     treeview_->setRootIsDecorated(false);
     treeview_->setHeaderHidden(true);
     treeview_->setEditTriggers(QAbstractItemView::NoEditTriggers);
+    setStyleSheet(R"(
+QToolButton {
+  background-color: transparent;
+  color: whitesmoke;
+}
+)");
 
     treeview_->setStyleSheet(R"(
 * {
   outline:0px;
 }
-
-QTreeView {
-  background-color: #333;
-  color: whitesmoke;
-}
-
-QLabel {
+QTreeView, QLabel {
+  background-color: transparent;
   color: whitesmoke;
 }
 
@@ -79,21 +88,30 @@ void WindowSelectorWidget::setModel(QAbstractItemModel *model)
 {
     model_ = model;
     treeview_->setModel(model);
-    if(QSettings().value("ui/viewPageOnly").toBool())
-        treeview_->setRootIndex(model_->index(PageSwitcher::View, 0));
+    connect(Config::config()->ui_showViewPagesOnly.listener(), &ConfigListener::configChanged, this, &WindowSelectorWidget::setupRootIndex);
+    setupRootIndex();
     connect(treeview_->selectionModel(), &QItemSelectionModel::currentRowChanged, this, &WindowSelectorWidget::onCurrentRowChanged);
-    treeview_->expandAll();
 }
 
 void WindowSelectorWidget::setCurrentIndex(const QModelIndex &modelIndex)
 {
     treeview_->setCurrentIndex(modelIndex);
+    update();
 }
 
 void WindowSelectorWidget::onCurrentRowChanged(const QModelIndex &current, const QModelIndex &previous)
 {
     if(auto parent = current.parent(); parent.isValid())
         emit windowChanged(parent.row(), current.row());
+}
+
+void WindowSelectorWidget::setupRootIndex()
+{
+    if(Config::config()->ui_showViewPagesOnly.get())
+        treeview_->setRootIndex(model_->index(PageSwitcher::View, 0));
+    else
+        treeview_->setRootIndex({});
+    treeview_->expandAll();
 }
 
 void WindowSelectorWidget::setPage(int category, int page)
@@ -123,6 +141,10 @@ void WindowSelectorWidget::paintEvent(QPaintEvent *event)
             treeview_->setIndexWidget(index, widget);
         }
     }
+
+    // background
+    QPainter painter(this);
+    painter.fillRect(rect(), QColor("#333"));
 }
 
 void WindowSelectorWidget::mousePressEvent(QMouseEvent *event)

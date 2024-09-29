@@ -48,6 +48,7 @@ private slots:
     void on_actionExport_CSV_triggered();
     void on_actionImport_CSV_triggered();
     void on_actionEdit_Mode_toggled(bool arg1);
+    void setupToolBar();
 
     // void on_tableView_clicked(const QModelIndex &index);
 
