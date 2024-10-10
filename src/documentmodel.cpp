@@ -533,10 +533,10 @@ QJsonObject DocumentModel::docJsonOf(QList<int> header, const QStringList &docAt
             //     return document.content;
             break;
         case TagsColumn:{
-            // QJsonArray tagsArr;
-            // for(auto &&i : document.tags)
-            //     tagsArr.append(i);
-            // object.insert("tags", tagsArr);
+            QJsonArray tagsArr;
+            for(auto &&i : document.tags)
+                tagsArr.append(i);
+            object.insert("tags", tagsArr);
             // QStringList strList;
             // for(auto id : document.tags)
             //     strList << client_->getTagName(id);
@@ -601,5 +601,13 @@ QJsonObject DocumentModel::docJsonOf(QList<int> header, const QStringList &docAt
             }
         }
     }
+    if(!object.contains("correspondent"))
+        object.insert("tags", QJsonObject{});
+    if(!object.contains("document_type"))
+        object.insert("tags", QJsonObject{});
+    if(!object.contains("storage_path"))
+        object.insert("tags", QJsonObject{});
+    if(!object.contains("tags"))
+        object.insert("tags", QJsonArray{});
     return object;
 }

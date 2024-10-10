@@ -263,6 +263,31 @@ void ViewWidget::on_treeView_customContextMenuRequested(const QPoint &pos)
         menu->addAction(ui->actionDownload);
     else
         menu->addAction(ui->actionBulk_Download);
+
+    if(!client_->currentUser().is_staff) return;
+    menu->addSeparator();
+
+    auto bulkMenu = menu->addMenu(tr("Bulk Edit"));
+
+    auto typeMenu = bulkMenu->addMenu(tr("Set Document Type"));
+    for(auto &&type : QList<DocumentType>{ DocumentType::na() } + client_->document_typeList())
+        typeMenu->addAction(type.name, this, [this, id = type.id]{
+            client_->api()->bulkEdit.set_document_type(selectedDocs_, id);
+            sync();
+        });
+
+    auto pathMenu = bulkMenu->addMenu(tr("Set Storage Path"));
+    for(auto &&path : QList<StoragePath>{ StoragePath::na() } + client_->storage_pathList())
+        pathMenu->addAction(path.name, this, [this, id = path.id]{
+            client_->api()->bulkEdit.set_storage_path(selectedDocs_, id);
+            sync();
+        });
+    auto corrMenu = bulkMenu->addMenu(tr("Set Correspondent"));
+    for(auto &&corr : QList<Correspondent>{ Correspondent::na() } + client_->correspondentList())
+        corrMenu->addAction(corr.name, this, [this, id = corr.id]{
+            client_->api()->bulkEdit.set_correspondent(selectedDocs_, id);
+            sync();
+        });
     menu->exec(ui->treeView->viewport()->mapToGlobal(pos));
 }
 
@@ -349,6 +374,11 @@ QString ViewWidget::description() const
     return description_;
 }
 
+void ViewWidget::sync()
+{
+    getDocs();
+}
+
 #define INDEX_WIDGET(Type, n) \
 auto n##_index = model_->index(row, DocumentModel::Type##Column); \
 if(show){ \
@@ -358,7 +388,7 @@ if(show){ \
     for(auto &n : client_->n##List()) \
         n##_cbbox->addItem(n.name, n.id); \
     n##_cbbox->setCurrentText(client_->get##Type##Name(doc.n)); \
-    connect(n##_cbbox, &QComboBox::currentIndexChanged, this, [=]{ \
+    connect(n##_cbbox, &QComboBox::currentIndexChanged, this, [=, this]{ \
         model_->setData(n##_index, n##_cbbox->currentData(), Qt::EditRole); \
     }); \
     ui->treeView->setIndexWidget(n##_index, n##_cbbox); \
@@ -392,7 +422,7 @@ void ViewWidget::paintEvent(QPaintEvent *event)
 
 void ViewWidget::on_actionUpload_triggered()
 {
-    if(auto files = QFileDialog::getOpenFileNames(this, "Upload pdf...", "", "*.pdf");
+    if(auto files = QFileDialog::getOpenFileNames(this, tr("Upload your PDF files..."), "", "*.pdf");
         !files.isEmpty()){
         auto dialog = new DocumentUploadDialog(this, files, client_);
         dialog->show();

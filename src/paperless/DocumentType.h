@@ -5,18 +5,25 @@
 
 struct DocumentType
 {
+    static auto na(){
+        DocumentType type;
+        type.name = "n/a";
+        type.id = 0;
+        return type;
+    }
+
     static auto fromVariant(const QVariant &variant){
-        DocumentType path;
-        set_attr(path, variant, id, Int);
-        set_attr(path, variant, slug, String);
-        set_attr(path, variant, name, String);
-        set_attr(path, variant, match, String);
-        set_attr(path, variant, matching_algorithm, Int);
-        set_attr(path, variant, is_insensitive, Bool);
-        set_attr(path, variant, document_count, Int);
-        set_attr(path, variant, owner, Int);
-        set_attr(path, variant, user_can_change, Bool);
-        return path;
+        DocumentType type;
+        set_attr(type, variant, id, Int);
+        set_attr(type, variant, slug, String);
+        set_attr(type, variant, name, String);
+        set_attr(type, variant, match, String);
+        set_attr(type, variant, matching_algorithm, Int);
+        set_attr(type, variant, is_insensitive, Bool);
+        set_attr(type, variant, document_count, Int);
+        set_attr(type, variant, owner, Int);
+        set_attr(type, variant, user_can_change, Bool);
+        return type;
     }
 
     int id;

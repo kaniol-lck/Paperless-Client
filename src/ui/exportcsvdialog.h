@@ -23,14 +23,11 @@ public:
     explicit ExportCSVDialog(QWidget *parent, Paperless *client, SavedView view, const QList<Document> &docList);
     explicit ExportCSVDialog(QWidget *parent, Paperless *client, SavedView view, const QList<int> &docIdList);
     explicit ExportCSVDialog(QWidget *parent, Paperless *client, SavedView view, Reply<ReturnList<Document>> reply);
-    explicit ExportCSVDialog(QWidget *parent, Paperless *client, SavedView view);
     ~ExportCSVDialog();
 
 private slots:
     void on_buttonBox_accepted();
-
     void on_pushButton_clicked();
-
     void on_pushButton_2_clicked();
 
 private:
@@ -38,7 +35,10 @@ private:
     Paperless *client_;
     DocumentModel *model_;
     SavedView view_;
+    explicit ExportCSVDialog(QWidget *parent, Paperless *client, SavedView view);
 
+    QList<int> getSections();
+    void setupSections();
     void setupExportFields();
 };
 

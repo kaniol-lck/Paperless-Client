@@ -3,6 +3,7 @@
 
 #include <QFile>
 #include <QStandardItemModel>
+#include <QtConcurrent/QtConcurrent>
 
 #include "documentmodel.h"
 #include "util/CSVHelper.hpp"
@@ -16,25 +17,19 @@ ImportCSVDialog::ImportCSVDialog(DocumentModel *model, QWidget *parent, Paperles
     model_(new QStandardItemModel)
 {
     ui->setupUi(this);
-    // ui->treeView->setModel(model_);
-    // for(auto &&v : fromCSV(fileName, 0, 2))
-    // {
-    //     list << Document::fromVariant(v);
-    // }
 
-    auto &&[headerLine, list] = fromCSVV(fileName, 0, 2);
-    auto header = docModel_->headerOf(headerLine);
-    for(auto &&i : list){
-        docList_ << docModel_->docOf(header, i);
-        docJsonList_ << docModel_->docJsonOf(header, i);
-        qDebug() << docModel_->docJsonOf(header, i);
-    }
+    ui->buttonBox->setEnabled(false);
+    auto future = QtConcurrent::run(&ImportCSVDialog::loadCSV, this, fileName);
+    auto watcher = new QFutureWatcher<void>(this);
+    watcher->setFuture(future);
+    connect(watcher, &QFutureWatcher<void>::finished, this, [this]{
+        auto m = new DocumentModel(this, client_);
+        m->setList(docList_);
+        ui->treeView->setModel(m);
 
-    auto m = new DocumentModel(this, client_);
-    m->setList(docList_);
-    ui->treeView->setModel(m);
-
-    fileValid_ = true;
+        fileValid_ = true;
+        ui->buttonBox->setEnabled(true);
+    });
 }
 
 ImportCSVDialog::~ImportCSVDialog()
@@ -50,20 +45,48 @@ bool ImportCSVDialog::fileValid() const
 void ImportCSVDialog::on_buttonBox_accepted()
 {
     auto count = new int(0);
-    for(auto &&json : docJsonList_){
+    for(auto &&doc : docList_){
         (*count)++;
-        client_->api()->putDocument(json.value("id").toInt(), json)
+        client_->api()->putDocument(doc.id, doc.toJsonNew(Document{}))
             .setOnFinished(this, [count](bool success){
-            if(--(*count) == 0){
-                delete count;
-                qDebug() << "finished";
-            }
-        }, [count](auto){
-            if(--(*count) == 0){
-                delete count;
-                qDebug() << "finished";
-            }
-        });
+                if(--(*count) == 0){
+                    delete count;
+                    qDebug() << "finished";
+                }
+            }, [count](auto){
+                               if(--(*count) == 0){
+                                   delete count;
+                                   qDebug() << "finished";
+                               }
+                           });
+    }
+
+
+    // for(auto &&json : docJsonList_){
+    //     (*count)++;
+    //     client_->api()->putDocument(json.value("id").toInt(), json)
+    //         .setOnFinished(this, [count](bool success){
+    //         if(--(*count) == 0){
+    //             delete count;
+    //             qDebug() << "finished";
+    //         }
+    //     }, [count](auto){
+    //         if(--(*count) == 0){
+    //             delete count;
+    //             qDebug() << "finished";
+    //         }
+    //     });
+    // }
+}
+
+void ImportCSVDialog::loadCSV(const QString &fileName)
+{
+    auto &&[headerLine, list] = fromCSVV(fileName, 0, 2);
+    auto header = docModel_->headerOf(headerLine);
+    for(auto &&i : list){
+        docList_ << docModel_->docOf(header, i);
+        docJsonList_ << docModel_->docJsonOf(header, i);
+        // qDebug() << docModel_->docJsonOf(header, i);
     }
 }
 

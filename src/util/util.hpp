@@ -79,7 +79,8 @@ for(auto &&v : ::value(c, #attr).toList()){ \
 obj.insert(#attr, attr);
 
 #define put_attr_null(obj, attr) \
-obj.insert(#attr, attr? attr : QJsonValue::Null);
+if(attr) obj.insert(#attr, attr); \
+else obj.insert(#attr, QJsonValue::Null);
 
 #define if_put_attr(doc, obj, attr) \
 if(attr != doc.attr) obj.insert(#attr, attr);

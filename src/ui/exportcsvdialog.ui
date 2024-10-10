@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>655</width>
-    <height>438</height>
+    <width>1070</width>
+    <height>620</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -21,9 +21,6 @@
      </property>
      <widget class="QWidget" name="">
       <layout class="QGridLayout" name="gridLayout">
-       <item row="0" column="0" colspan="2">
-        <widget class="QListWidget" name="exportFields"/>
-       </item>
        <item row="1" column="0">
         <widget class="QPushButton" name="pushButton">
          <property name="text">
@@ -38,9 +35,23 @@
          </property>
         </widget>
        </item>
+       <item row="0" column="0" colspan="2">
+        <widget class="QListWidget" name="exportFields">
+         <property name="dragEnabled">
+          <bool>true</bool>
+         </property>
+         <property name="dragDropMode">
+          <enum>QAbstractItemView::DragDropMode::InternalMove</enum>
+         </property>
+        </widget>
+       </item>
       </layout>
      </widget>
-     <widget class="QTreeView" name="treeView"/>
+     <widget class="QTreeView" name="treeView">
+      <property name="editTriggers">
+       <set>QAbstractItemView::EditTrigger::NoEditTriggers</set>
+      </property>
+     </widget>
     </widget>
    </item>
    <item>

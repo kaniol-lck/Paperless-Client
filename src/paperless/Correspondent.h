@@ -5,6 +5,13 @@
 
 struct Correspondent
 {
+    static auto na(){
+        Correspondent correspondent;
+        correspondent.name = "n/a";
+        correspondent.id = 0;
+        return correspondent;
+    }
+
     static auto fromVariant(const QVariant &variant){
         Correspondent correspondent;
         set_attr(correspondent, variant, id, Int);

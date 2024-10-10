@@ -5,6 +5,13 @@
 
 struct StoragePath
 {
+    static auto na(){
+        StoragePath path;
+        path.name = "n/a";
+        path.id = 0;
+        return path;
+    }
+
     static auto fromVariant(const QVariant &variant){
         StoragePath path;
         set_attr(path, variant, id, Int);

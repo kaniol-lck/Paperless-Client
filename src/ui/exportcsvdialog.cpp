@@ -19,9 +19,11 @@ ExportCSVDialog::ExportCSVDialog(QWidget *parent, Paperless *client, SavedView v
 ExportCSVDialog::ExportCSVDialog(QWidget *parent, Paperless *client, SavedView view, Reply<ReturnList<Document> > reply) :
     ExportCSVDialog(parent, client, view)
 {
+    ui->buttonBox->button(QDialogButtonBox::Ok)->setEnabled(false);
     reply.setOnFinished(this, [this](ReturnList<Document> returnList){
         model_->setList(returnList.results);
         setupExportFields();
+        ui->buttonBox->button(QDialogButtonBox::Ok)->setEnabled(true);
     });
 }
 
@@ -34,6 +36,44 @@ ExportCSVDialog::ExportCSVDialog(QWidget *parent, Paperless *client, SavedView v
 {
     ui->setupUi(this);;
     ui->treeView->setModel(model_);
+    ui->splitter->setStretchFactor(0, 1);
+    ui->splitter->setStretchFactor(1, 4);
+    connect(ui->exportFields->model(), &QAbstractItemModel::rowsMoved, this, &ExportCSVDialog::setupSections);
+    ui->exportFields->setEditTriggers(QAbstractItemView::DoubleClicked |
+                                      QAbstractItemView::EditKeyPressed |
+                                      QAbstractItemView::AnyKeyPressed);
+}
+
+QList<int> ExportCSVDialog::getSections()
+{
+    QList<int> list;
+    for(int row = 0; row < ui->exportFields->count(); row++){
+        auto item = ui->exportFields->item(row);
+        if(item->checkState() == Qt::Unchecked) continue;
+        int i = item->data(Qt::UserRole).toInt();
+        list << i;
+        // headerList1 << '"' + model_->headerData(i, Qt::Horizontal, Qt::UserRole).toString() + '"';
+        // headerList2 << '"' + model_->headerData(i, Qt::Horizontal).toString() + '"';
+    }
+    return list;
+}
+
+void ExportCSVDialog::setupSections()
+{
+    auto sectionList = getSections();
+    auto header = ui->treeView->header();
+    // header.section
+    qDebug() << sectionList;
+    if(!sectionList.isEmpty()){
+        // ui->modTreeView->header()->blockSignals(true);
+        for(int i = 0; i < header->count() - 1; i++){
+            if(i < sectionList.size())
+                header->moveSection(header->visualIndex(sectionList.at(i)), i + 1);
+            else
+                header->setSectionHidden(header->logicalIndex(i + 1), true);
+        }
+        // ui->modTreeView->header()->blockSignals(false);
+    }
 }
 
 ExportCSVDialog::~ExportCSVDialog()
@@ -80,6 +120,7 @@ void ExportCSVDialog::on_buttonBox_accepted()
 void ExportCSVDialog::setupExportFields()
 {
     auto sectionList = model_->sectionList(view_);
+    ui->exportFields->blockSignals(true);
     for(auto i : sectionList){
         auto item = new QListWidgetItem(model_->headerData(i, Qt::Horizontal).toString());
         item->setData(Qt::UserRole, i);
@@ -93,6 +134,8 @@ void ExportCSVDialog::setupExportFields()
         item->setCheckState(Qt::Unchecked);
         ui->exportFields->addItem(item);
     }
+    ui->exportFields->blockSignals(false);
+    setupSections();
 }
 
 void ExportCSVDialog::on_pushButton_clicked()
@@ -109,4 +152,3 @@ void ExportCSVDialog::on_pushButton_2_clicked()
     if(row < 0 || row == ui->exportFields->count() - 1) return;
     ui->exportFields->insertItem(row, ui->exportFields->takeItem(row + 1));
 }
-

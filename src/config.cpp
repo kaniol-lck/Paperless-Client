@@ -19,22 +19,19 @@ Config::Config(QObject *parent)
     view_toolBar_showToolBar.setName(tr("Show Tool Bar"));
     view_toolBar_showPageBar.setName(tr("Show Page Bar"));
 
-    auto imageFilePathConfig = std::make_shared<FilePathConfig>(tr("Select a image file."), tr("Images (*.png *.jpg *.jpeg)"));
-    ui_sideBarLogo.setWidgetConfig(imageFilePathConfig);
-    ui_welcomePageImagePath.setWidgetConfig(imageFilePathConfig);
+    auto imageFilePath = WrapperGenerator<FilePathWrapper, QString>::makePtr(tr("Select a image file."), tr("Images (*.png *.jpg *.jpeg)"));
+    ui_sideBarLogo.setGeneratorPtr(imageFilePath);
+    ui_welcomePageImagePath.setGeneratorPtr(imageFilePath);
 
-    auto docListDisplayConfig = std::make_shared<ComboBoxConfig>(QStringList{
+    view_docListDisplay.setGenerator<ComboBoxWrapper>(QStringList{
         tr("Unified"),
         tr("Pagination"),
     });
-    view_docListDisplay.setWidgetConfig(docListDisplayConfig);
-    auto spinBoxConfig = std::make_shared<SpinBoxConfig>();
-    spinBoxConfig->setAttr([](auto *widget){
+    view_docCountPerPage.setGenerator<SpinBoxWrapper>()->setAttrSetter([](auto *widget){
         QSpinBox *spinBox = qobject_cast<QSpinBox*>(widget);
         spinBox->setMinimum(1);
         spinBox->setMaximum(25);
     });
-    view_docCountPerPage.setWidgetConfig(spinBoxConfig);
 }
 
 Config *Config::config(){

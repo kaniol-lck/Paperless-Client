@@ -31,6 +31,7 @@ public:
     QString description() const;
 
 public slots:
+    void sync();
     void getDocs();
     void search(int page = 1);
     void updateSections();

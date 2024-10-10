@@ -185,6 +185,7 @@ Reply<bool> PaperlessApi::postBulkEdit(const QList<int> &documents, const QStrin
     obj.insert("method", method);
     obj.insert("parameters", args);
     auto request = api_.createRequest(bulk_edit);
+    request.setHeader(QNetworkRequest::ContentTypeHeader, "application/json");
     auto data = QJsonDocument(obj).toJson(QJsonDocument::Compact);
     return { manager_.post(request, data), [](auto r){
                 QRestReply reply(r);

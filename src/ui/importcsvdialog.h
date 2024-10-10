@@ -32,6 +32,8 @@ private:
     QList<QJsonObject> docJsonList_;
     QStandardItemModel *model_;
     bool fileValid_ = false;
+
+    void loadCSV(const QString &fileName);
 };
 
 #endif // IMPORTCSVDIALOG_H

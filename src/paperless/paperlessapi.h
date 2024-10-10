@@ -45,7 +45,9 @@ Reply<Type> get##Type(int id)  \
 
 #define BULK_EDIT_METHOD(method, value, Type) \
 Reply<bool> method(const QList<int> &documents, Type value){ \
-    QJsonObject args = { {#value, value} }; \
+    QJsonObject args; \
+    if(value) args.insert(#value, value); \
+    else args.insert(#value, QJsonValue::Null); \
     return api_->postBulkEdit(documents, #method, args); \
 } \
 

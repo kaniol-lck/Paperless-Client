@@ -81,7 +81,7 @@ QPair<QStringList, QList<QStringList>> fromCSVV(const QString &fileName, int hea
         }
         lineCount++;
     }
-    qDebug() << headerLine << list;
+    // qDebug() << headerLine << list;
     return qMakePair(headerLine, list);
 }
 
