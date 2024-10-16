@@ -2,8 +2,6 @@
 #define DOCUMENTMODEL_H
 
 #include "paperless/Document.h"
-#include "paperless/ReturnList.hpp"
-#include "paperless/SavedView.h"
 #include <QAbstractTableModel>
 
 class Paperless;
@@ -14,23 +12,15 @@ public:
     explicit DocumentModel(QObject *parent/* = nullptr*/, Paperless *client);
 
     enum Column{
-        IdColumn,
         TitleColumn,
         CorrespondentColumn,
         DocumentTypeColumn,
         StoragePathColumn,
-        ContentColumn,
         TagsColumn,
         CreatedColumn,
-        CreatedDateColumn,
-        ModifiedColumn,
         AddedColumn,
-        DeletedAtColumn,
         ArchiveSerialNumberColumn,
-        OriginalFileNameColumn,
-        ArchivedFileNameColumn,
         OwnerColumn,
-        UserCanChangeColumn,
         IsSharedByRequesterColumn,
         NotesColumn,
         CustomFieldsColumn,
@@ -46,6 +36,8 @@ public:
     QVariant headerData(int section, Qt::Orientation orientation, int role = Qt::DisplayRole) const override;
     Qt::ItemFlags flags(const QModelIndex &index) const override;
 
+    void setDocument(int row, const Document& document);
+
     QList<int> headerOf(const QStringList &docAttr);
     Document docOf(QList<int> header, const QStringList &docAttr);
     QJsonObject docJsonOf(QList<int> header, const QStringList &docAttr);
@@ -53,7 +45,7 @@ public:
     void setList(const QList<Document> &newList);
     void appendList(const QList<Document> &newList);
 
-    QList<int> sectionList(const SavedView &view);
+    QList<int> sectionList(const QStringList &display_fields);
 
     const Document &documentAt(const QModelIndex &index);
     const Document &documentAt(int row);
@@ -68,8 +60,6 @@ private:
     QList<Document> list_;
     Paperless *client_;
     bool inited_ = false;
-
-    QList<int> customFieldList() const;
 
 };
 

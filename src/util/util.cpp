@@ -4,6 +4,8 @@
 #include <QDir>
 #include <QProcess>
 #include <QUrl>
+#include <QVBoxLayout>
+#include <QVBoxLayout>
 
 void openFolder(const QString &path)
 {
@@ -64,4 +66,20 @@ QIcon reverseIcon(const QIcon &icon, int extent)
     auto pixmap2 =  icon.pixmap(extent);
     reversed.addPixmap(pixmap2, QIcon::Mode::Selected);
     return reversed;
+}
+
+
+QDialog *makeDialog(QWidget *widget, const QString &title){
+    auto dialog = new QDialog(widget->parentWidget());
+    if(!title.isEmpty())
+        dialog->setWindowTitle(title);
+    widget->setParent(dialog);
+    auto dialogButtons = new QDialogButtonBox(dialog);
+    dialogButtons->setStandardButtons(QDialogButtonBox::Ok | QDialogButtonBox::Cancel);
+    QObject::connect(dialogButtons, &QDialogButtonBox::accepted, dialog, &QDialog::accept);
+    QObject::connect(dialogButtons, &QDialogButtonBox::rejected, dialog, &QDialog::reject);
+    auto layout = new QVBoxLayout(dialog);
+    layout->addWidget(widget);
+    layout->addWidget(dialogButtons);
+    return dialog;
 }

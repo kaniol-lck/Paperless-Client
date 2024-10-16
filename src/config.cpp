@@ -30,7 +30,7 @@ Config::Config(QObject *parent)
     view_docCountPerPage.setGenerator<SpinBoxWrapper>()->setAttrSetter([](auto *widget){
         QSpinBox *spinBox = qobject_cast<QSpinBox*>(widget);
         spinBox->setMinimum(1);
-        spinBox->setMaximum(25);
+        spinBox->setMaximum(999);
     });
 }
 

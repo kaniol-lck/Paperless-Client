@@ -5,6 +5,7 @@
 #include <QProgressBar>
 #include <QPushButton>
 #include <QStandardItemModel>
+#include <QProgressDialog>
 
 #include "paperless/paperless.h"
 #include "paperless/paperlessapi.h"
@@ -33,7 +34,7 @@ DocumentUploadDialog::DocumentUploadDialog(QWidget *parent, const QStringList &f
             upProgressItem,
         });
     }
-    ui->buttonBox->button(QDialogButtonBox::Ok)->setVisible(false);
+    ui->buttonBox->/*button(QDialogButtonBox::Ok)->*/setVisible(false);
 }
 
 DocumentUploadDialog::~DocumentUploadDialog()
@@ -49,6 +50,7 @@ void DocumentUploadDialog::on_buttonBox_accepted()
 void DocumentUploadDialog::on_uploadButton_clicked()
 {
     ui->uploadButton->setVisible(false);
+    auto dialog = new QProgressDialog(tr("Upload progress:"), tr("Cancel"), 0, model_->rowCount(), this);
 
     for (int row = 0; row < model_->rowCount(); ++row) {
         auto filePath = model_->data(model_->index(row, 1)).toString();
@@ -60,9 +62,10 @@ void DocumentUploadDialog::on_uploadButton_clicked()
                                                   ui->docAttr->document_type(),
                                                   ui->docAttr->storage_path());
         count++;
-        reply.setOnFinished(this, [this](auto){
+        reply.setOnFinished(this, [this, dialog](auto){
+            dialog->setValue(model_->rowCount() - count);
             if(--count == 0){
-                ui->buttonBox->button(QDialogButtonBox::Ok)->setVisible(true);
+                ui->buttonBox->/*button(QDialogButtonBox::Ok)->*/setVisible(true);
             }
         });
         connect(reply.reply(), &QNetworkReply::downloadProgress, this, [=](auto &&p, auto &&t){
@@ -71,4 +74,5 @@ void DocumentUploadDialog::on_uploadButton_clicked()
         });
     }
 
+    dialog->exec();
 }

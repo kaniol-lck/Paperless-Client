@@ -6,6 +6,8 @@
 #include "paperless/Document.h"
 #include "util/reply.hpp"
 
+
+class QLineEdit;
 namespace Ui {
 class DocumentEdit;
 }
@@ -20,25 +22,18 @@ public:
 
     void setDocument(const Document &document);
     void setClient(Paperless *newClient);
-
-signals:
-    void documentUpdated();
-    void finished();
-
-public slots:
-    void save();
+    Document getDocument() const;
 
 private slots:
     void updateCorrespondentList();
     void updateDocTypeList();
     void updatePathList();
 
-    void on_saveButton_clicked();
-
 private:
     Ui::DocumentEdit *ui;
     Paperless *client_;
     Document document_;
+    QList<QLineEdit*> lineEdits_;
 
     QList<std::shared_ptr<Reply<bool>>> replies;
 };

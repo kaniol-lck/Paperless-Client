@@ -64,3 +64,52 @@ bool Paperless::hideRemote()
 {
     return CustomViews::views()->getHide_remote();
 }
+
+QString Paperless::getFieldName(const QString &name)
+{
+    static QString cs("custom_field_");
+    if(name.startsWith(cs)){
+        bool ok = false;
+        int field = name.sliced(cs.size()).toInt(&ok);
+        if(!ok) return "n/a";
+        return getCustomFieldName(field);
+    }
+    if(name == "title") return tr("title");
+    if(name == "correspondent") return tr("correspondent");
+    if(name == "documenttype") return tr("documenttype");
+    if(name == "storagepath") return tr("storagepath");
+    if(name == "tag") return tr("tag");
+    if(name == "created") return tr("created");
+    if(name == "added") return tr("added");
+    if(name == "asn") return tr("asn");
+    if(name == "owner") return tr("owner");
+    if(name == "shared") return tr("shared");
+    if(name == "note") return tr("note");
+
+    qDebug() << "no" << name;
+    return "n/a";
+}
+
+QStringList Paperless::fieldList()
+{
+    QStringList list;
+    static QList<QString> fieldList_ = {
+        "title",
+        "correspondent",
+        "documenttype",
+        "storagepath",
+        "tag",
+        "created",
+        "added",
+        "asn",
+        "owner",
+        "shared",
+        "note"
+    };
+
+    for(auto &&custom_field : custom_fieldList()){
+        auto name = QString("custom_field_%1").arg(custom_field.id);
+        list << name;
+    }
+    return fieldList_ + list;
+}

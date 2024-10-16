@@ -91,6 +91,9 @@ public:
     QList<CustomSavedView> customViewList();
     bool hideRemote();
 
+    QString getFieldName(const QString &name);
+    QStringList fieldList();
+
 signals:
     DEFINE_LIST_S(Correspondent, correspondent);
     DEFINE_LIST_S(Document, document);

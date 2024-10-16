@@ -158,8 +158,9 @@ void Client::updateAccountList()
     auto menu = new QMenu(this);
     ui->actionSwitch_To->setMenu(menu);
     for(auto &&[server, list] : AccountManager::manager()->accountMap().asKeyValueRange()){
+        auto servermenu = menu->addMenu(server);
         for(auto &&account : list){
-            menu->addAction(account.username, [account]{
+            servermenu->addAction(account.username, [account]{
                 AccountManager::manager()->setCurrentAccount(account);
             });
         }

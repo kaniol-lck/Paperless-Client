@@ -81,7 +81,7 @@ public:
     template<typename Func1>
     void setOnFinished(QObject *object, Func1 callback, std::function<void(QNetworkReply::NetworkError)> errorHandler = {}){
         //copy-capture to prevent this deconstructed
-        QObject::connect(reply_, &QNetworkReply::finished, object, [=, reply = reply_, resultInterpreter = resultInterpreter_, runBackground = runBackground_]{
+        QObject::connect(reply_, &QNetworkReply::finished, object, [=, this, reply = reply_, resultInterpreter = resultInterpreter_, runBackground = runBackground_]{
             if(reply->error() != QNetworkReply::NoError) {
                 qDebug() << reply->errorString();
                 // qDebug() << reply->readAll();

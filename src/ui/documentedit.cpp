@@ -18,9 +18,19 @@ DocumentEdit::~DocumentEdit()
 void DocumentEdit::setDocument(const Document &document)
 {
     document_ = document;
+    ui->title->setText(document.title);
     ui->correspondentSelect->setCurrentText(client_->getCorrespondentName(document.correspondent));
     ui->documentTypeSelect->setCurrentText(client_->getDocumentTypeName(document.document_type));
     ui->storagePathSelect->setCurrentText(client_->getStoragePathName(document.storage_path));
+    ui->content->setText(document.content);
+
+    int row = 4;
+    for(auto &&custom_field : document.custom_fields){
+        auto lineEdit = new QLineEdit(this);
+        lineEdits_ << lineEdit;
+        lineEdit->setText(custom_field.value);
+        ui->formLayout->insertRow(row++, client_->getCustomFieldName(custom_field.field), lineEdit);
+    }
 }
 
 void DocumentEdit::updateCorrespondentList()
@@ -55,21 +65,18 @@ void DocumentEdit::setClient(Paperless *newClient)
     updatePathList();
 }
 
-void DocumentEdit::save()
+Document DocumentEdit::getDocument() const
 {
     Document docNew = document_;
+    docNew.title = ui->title->text();
     docNew.correspondent = ui->correspondentSelect->currentData().toInt();
     docNew.document_type = ui->documentTypeSelect->currentData().toInt();
     docNew.storage_path = ui->storagePathSelect->currentData().toInt();
-
-    client_->api()->putDocument(document_.id, docNew, document_).setOnFinished(this, [this](auto){
-        qDebug() << "finished";
-        emit documentUpdated();
-    });
+    docNew.content = ui->content->toPlainText();
+    int i = 0;
+    for(auto &custom_field : docNew.custom_fields){
+        auto lineEdit = lineEdits_[i++];
+        custom_field.value = lineEdit->text();
+    }
+    return docNew;
 }
-
-void DocumentEdit::on_saveButton_clicked()
-{
-    save();
-}
-

@@ -34,7 +34,7 @@ public slots:
     void sync();
     void getDocs();
     void search(int page = 1);
-    void updateSections();
+    void setDisplayFields(const QStringList display_fields);
     void setList(const ReturnList<Document> &list);
 
 private slots:
@@ -58,13 +58,23 @@ private slots:
 
     void on_actionExport_CSV_for_All_triggered();
 
+    void on_actionAuto_Fill_triggered();
+
+    void on_actionDisplayed_Field_triggered();
+    void onTreeViewHeaderCustomContextMenuRequested(const QPoint &pos);
+
+    void on_actionEdit_Document_triggered();
+
+protected:
+    void paintEvent(QPaintEvent *event) override;
+
 private:
     Ui::ViewWidget *ui;
     QComboBox *searchSelect_;
     QLineEdit *searchLine_;
     QComboBox *pageSelect_;
     Paperless *client_;
-    const SavedView origin_view_;
+    SavedView original_view_;
     SavedView view_;
     DocumentModel *model_;
     QList<FilterMenu*> filters_;
@@ -73,14 +83,12 @@ private:
     QList<int> selectedDocs_;
     QString description_;
     QList<int> all_;
+    QMenu *sortFieldMenu_;
 
     QToolButton *filter2button(FilterMenu *filter);
     Reply<ReturnList<Document>> searchReply(int page_size, int page = 1);
 
     bool appendMode_;
-    // QWidget interface
-protected:
-    void paintEvent(QPaintEvent *event) override;
 };
 
 #endif // VIEWWIDGET_H

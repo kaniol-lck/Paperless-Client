@@ -69,12 +69,6 @@ for(auto &&v : ::value(c, #attr).toList()){ \
     obj.attr << Type::fromVariant(v); \
 }
 
-// #define a_put_attr(obj, attr) \
-// obj.insert(#attr, attr);
-
-// #define a_put_attr_null(obj, attr) \
-// obj.insert(#attr, attr? attr : QJsonValue::Null);
-
 #define put_attr(obj, attr) \
 obj.insert(#attr, attr);
 

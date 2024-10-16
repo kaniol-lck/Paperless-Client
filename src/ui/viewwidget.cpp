@@ -5,6 +5,7 @@
 #include "ui/importcsvdialog.h"
 #include "ui_viewwidget.h"
 
+#include <QActionGroup>
 #include <QComboBox>
 #include <QDesktopServices>
 #include <QFileDialog>
@@ -19,6 +20,8 @@
 #include "exportcsvdialog.h"
 #include "accountmanager.h"
 #include "documentuploaddialog.h"
+#include "ui/widgets/displayedfieldsedit.h"
+#include "util/util.h"
 
 ViewWidget::ViewWidget(QWidget *parent, Paperless *client, SavedView view) :
     QMainWindow(parent),
@@ -27,14 +30,13 @@ ViewWidget::ViewWidget(QWidget *parent, Paperless *client, SavedView view) :
     searchLine_(new QLineEdit(this)),
     pageSelect_(new QComboBox(this)),
     client_(client),
-    origin_view_(view),
+    original_view_(view),
     view_(view),
     model_(new DocumentModel(this, client))
 {
     ui->setupUi(this);
     // ui->documentEdit->setClient(client_);
     ui->treeView->setModel(model_);
-    ui->tableView->setModel(model_);
     ui->treeView->header()->setMinimumHeight(48);
     setWindowTitle(view_.name);
 
@@ -104,6 +106,52 @@ ViewWidget::ViewWidget(QWidget *parent, Paperless *client, SavedView view) :
 
     connect(Config::config()->view_toolBar.listener(), &ConfigListener::configChanged, this, &ViewWidget::setupToolBar);
     setupToolBar();
+
+    ui->treeView->header()->setContextMenuPolicy(Qt::CustomContextMenu);
+    connect(ui->treeView->header(), &QHeaderView::customContextMenuRequested, this, &ViewWidget::onTreeViewHeaderCustomContextMenuRequested);
+    connect(ui->treeView->header(), &QHeaderView::sectionMoved, this, [this](auto){
+        QStringList list;
+        for(auto i = 0; i < model_->columnCount(); i++){
+            auto logicalIndex = ui->treeView->header()->logicalIndex(i);
+            if(!ui->treeView->isColumnHidden(logicalIndex))
+                list << model_->headerData(logicalIndex, Qt::Horizontal, Qt::UserRole).toString();
+        }
+        view_.display_fields = list;
+    });
+
+    static QList<QPair<QString, QString>> sort_fields_map = {
+        { "created", "created" },
+        { "modified", "modified" },
+        { "added", "added" },
+        { "title", "title" },
+        { "correspondent__name", "correspondent" },
+        { "document_type__name", "type" },
+        { "archive_serial_number", "asn" },
+        { "num_notes", "num_notes" },
+        { "owner", "owner" },
+        { "page_count", "page_count" },
+    };
+    sortFieldMenu_ = ui->menuView->addMenu(tr("Sort Field"));
+    auto group = new QActionGroup(this);
+    auto reverseAction = sortFieldMenu_->addAction("reverse", this, [this](bool checked){
+        view_.sort_reverse = checked;
+        search();
+    });
+    reverseAction->setCheckable(true);
+    reverseAction->setChecked(view.sort_reverse);
+    sortFieldMenu_->addSeparator();
+    for(auto &&[sort_field, name] : sort_fields_map){
+        auto action = sortFieldMenu_->addAction(name);
+        group->addAction(action);
+        action->setData(sort_field);
+        action->setCheckable(true);
+        if(sort_field == view_.sort_field) action->setChecked(true);
+        connect(action, &QAction::triggered, this, [this, sort_field]{
+            if(view_.sort_field == sort_field) return;
+            view_.sort_field = sort_field;
+            search();
+        });
+    }
 }
 
 ViewWidget::ViewWidget(QWidget *parent, Paperless *client, CustomSavedView view) :
@@ -173,22 +221,29 @@ SavedView ViewWidget::view() const
     return view_;
 }
 
-void ViewWidget::updateSections()
+void ViewWidget::setDisplayFields(const QStringList display_fields)
 {
-    auto list = model_->sectionList(view_);
-    for(auto &&header : { ui->treeView->header(),
-                          ui->tableView->horizontalHeader()}){
-        if(!list.isEmpty()){
-            header->blockSignals(true);
-            header->clearSelection();
-            for(int i = 0; i < header->count(); i++){
-                if(i < list.size())
-                    header->moveSection(header->visualIndex(list.at(i)), i);
-                else
-                    header->setSectionHidden(header->logicalIndex(i), true);
-            }
-            header->blockSignals(false);
+    view_.display_fields = display_fields;
+    auto &&header = ui->treeView->header();
+
+    // empty, then reset
+    if(view_.display_fields.isEmpty()){
+        for(int i = 0; i < header->count(); i++){
+            header->moveSection(header->visualIndex(i), i);
+            header->setSectionHidden(i, false);
         }
+    }
+
+    auto list = model_->sectionList(view_.display_fields);
+    if(!list.isEmpty()){
+        header->blockSignals(true);
+        header->clearSelection();
+        for(int i = 0; i < header->count(); i++){
+            if(i < list.size())
+                header->moveSection(header->visualIndex(list.at(i)), i);
+            header->setSectionHidden(header->logicalIndex(i), i >= list.size());
+        }
+        header->blockSignals(false);
     }
 }
 
@@ -214,7 +269,7 @@ void ViewWidget::setList(const ReturnList<Document> &list)
         currentPage_ = 1;
         pageSelect_->blockSignals(false);
     }
-    updateSections();
+    setDisplayFields(view_.display_fields);
     // ui->treeView->header()->resizeSections(QHeaderView::ResizeToContents);
     isNewSearch_ = true;
 }
@@ -257,7 +312,13 @@ void ViewWidget::on_treeView_customContextMenuRequested(const QPoint &pos)
 {
     if(selectedDocs_.isEmpty()) return;
     auto menu = new QMenu(this);
+
+    // menu->addAction(ui->actionAuto_Fill);
     //TODO: multi
+    if(selectedDocs_.size() == 1)
+        menu->addAction(ui->actionEdit_Document);
+
+
     menu->addAction(ui->actionPreview);
     if(selectedDocs_.size() == 1)
         menu->addAction(ui->actionDownload);
@@ -307,7 +368,6 @@ void ViewWidget::on_actionDownload_triggered()
 
 void ViewWidget::onSelectedChanged()
 {
-    auto indexes = ui->treeView->selectionModel()->selectedRows();
     selectedDocs_ = model_->documentsAt(ui->treeView->selectionModel()->selectedRows());
 
     // some enable & disables
@@ -358,7 +418,6 @@ void ViewWidget::on_actionEdit_Mode_toggled(bool arg1)
     } else{
         ui->treeView->setEditTriggers(QAbstractItemView::NoEditTriggers);
     }
-    // ui->stackedWidget->setCurrentIndex(arg1? 1 : 0);
 }
 
 void ViewWidget::setupToolBar()
@@ -397,7 +456,7 @@ if(show){ \
     delete widget; \
 }
 
-void ViewWidget::paintEvent(QPaintEvent *event)
+void ViewWidget::paintEvent(QPaintEvent *event[[maybe_unused]])
 {
     auto beginRow = ui->treeView->indexAt(QPoint(0, 0)).row();
     if(beginRow < 0) return;
@@ -426,6 +485,89 @@ void ViewWidget::on_actionUpload_triggered()
         !files.isEmpty()){
         auto dialog = new DocumentUploadDialog(this, files, client_);
         dialog->show();
+    }
+}
+
+
+void ViewWidget::on_actionAuto_Fill_triggered()
+{
+    if(selectedDocs_.isEmpty()) return;
+    for(auto index : ui->treeView->selectionModel()->selectedRows()){
+        auto doc = model_->documentAt(index);
+        static QRegularExpression reg(R"(\b\d\d-\d\d-\d\d\b)");
+        if(auto m = reg.match(doc.content); m.hasMatch()){
+            qDebug() << m.captured();
+            for(auto &field : doc.custom_fields){
+                if(field.field == 4){
+                    field.value = m.captured();
+                    qDebug() << client_->getCustomFieldName(4);
+                    model_->setDocument(index.row(), doc);
+                    break;
+                }
+            }
+        }
+    }
+}
+
+
+void ViewWidget::on_actionDisplayed_Field_triggered()
+{
+    auto edit = new DisplayedFieldsEdit(this);
+    edit->setup(view_.display_fields, client_);
+    auto dialog = makeDialog(edit, tr("Edit Displayed Field"));
+    connect(dialog, &QDialog::accepted, this, [=, this]{
+        auto displayFields = edit->getDisplayFields();
+        setDisplayFields(displayFields);
+    });
+    dialog->show();
+}
+
+void ViewWidget::onTreeViewHeaderCustomContextMenuRequested(const QPoint &pos)
+{
+    auto menu = new UnclosedMenu(this);
+    menu->addMenu(sortFieldMenu_);
+    menu->addSeparator();
+    auto field = client_->fieldList();
+    auto setupAction = [menu, this](QAction *action, bool checked){
+        action->setCheckable(true);
+        action->setChecked(checked);
+        connect(action, &QAction::triggered, this, [menu, this](auto){
+            QStringList list;
+            for(auto a : menu->actions())
+                if(a->isChecked()) list << a->data().toString();
+            setDisplayFields(list);
+        });
+        return action;
+    };
+    for(auto &&field : view_.display_fields)
+        setupAction(menu->addAction(client_->getFieldName(field)), true)
+            ->setData(field);
+    for(auto &&field : field)
+        if(!view_.display_fields.contains(field))
+            setupAction(menu->addAction(client_->getFieldName(field)), false)
+                ->setData(field);
+
+    menu->exec(ui->treeView->mapToGlobal(pos));
+}
+
+
+void ViewWidget::on_actionEdit_Document_triggered()
+{
+    if(selectedDocs_.isEmpty()) return;
+    if(selectedDocs_.size() == 1){
+        auto edit = new DocumentEdit(this);
+        edit->setClient(client_);
+        auto docOld = model_->documentAt(ui->treeView->selectionModel()->selectedRows().first().row());
+        edit->setDocument(docOld);
+        auto dialog = makeDialog(edit, tr("Edit Document"));
+        dialog->show();
+        connect(dialog, &QDialog::accepted, this, [edit, this, docOld]{
+            auto document = edit->getDocument();
+            client_->api()->putDocument(document.id, document, docOld)
+                .setOnFinished(this, [this](auto){
+                sync();
+            });
+        });
     }
 }
 

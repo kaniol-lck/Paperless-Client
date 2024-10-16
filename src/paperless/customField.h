@@ -4,6 +4,17 @@
 #include "qjsonobject.h"
 #include "util/util.hpp"
 
+// data_type:
+// string
+// url
+// date
+// boolean
+// integer
+// float
+// monetary
+// documentlink
+// select
+
 struct CustomField
 {
     static auto fromVariant(const QVariant &variant){
