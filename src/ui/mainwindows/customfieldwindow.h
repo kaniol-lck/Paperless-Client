@@ -6,6 +6,7 @@
 
 class CustomFieldWindow : public AttrViewWindow<CustomFieldModel>
 {
+    Q_OBJECT
 public:
     CustomFieldWindow(QWidget *parent, Paperless *client);
 };

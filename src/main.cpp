@@ -13,7 +13,8 @@ int main(int argc, char *argv[])
     a.setApplicationDisplayName(QObject::tr("Paperless Client"));
 
     auto font = a.font();
-    font.setPixelSize(15);
+    font.setFamily("Microsoft Yahei");
+    font.setPointSize(12);
     a.setFont(font);
 
     //setup translator

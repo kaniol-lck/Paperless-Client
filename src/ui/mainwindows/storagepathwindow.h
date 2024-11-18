@@ -6,6 +6,7 @@
 
 class StoragePathWindow : public AttrViewWindow<StoragePathModel>
 {
+    Q_OBJECT
 public:
     StoragePathWindow(QWidget *parent, Paperless *client);
 };

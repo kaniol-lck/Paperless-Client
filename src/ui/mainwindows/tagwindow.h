@@ -6,6 +6,7 @@
 
 class TagWindow : public AttrViewWindow<TagModel>
 {
+    Q_OBJECT
 public:
     TagWindow(QWidget *parent, Paperless *client);
 

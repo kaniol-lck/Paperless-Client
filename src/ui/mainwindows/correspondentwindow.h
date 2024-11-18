@@ -6,6 +6,7 @@
 
 class CorrespondentWindow : public AttrViewWindow<CorrespondentModel>
 {
+    Q_OBJECT
 public:
     CorrespondentWindow(QWidget *parent, Paperless *client);
 

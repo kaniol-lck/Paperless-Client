@@ -6,6 +6,7 @@
 
 class DocumentTypeWindow : public AttrViewWindow<DocumentTypeModel>
 {
+    Q_OBJECT
 public:
     DocumentTypeWindow(QWidget *parent, Paperless *client);
 };
