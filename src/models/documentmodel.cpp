@@ -4,15 +4,8 @@
 #include "qfont.h"
 
 DocumentModel::DocumentModel(QObject *parent, Paperless *client) :
-    QAbstractTableModel(parent),
-    client_(client)
+    PaperlessModel(parent, client)
 {}
-
-int DocumentModel::rowCount(const QModelIndex &parent[[maybe_unused]]) const
-{
-    if(!inited_) return 0;
-    return list_.count();
-}
 
 int DocumentModel::columnCount(const QModelIndex &parent[[maybe_unused]]) const
 {
@@ -53,7 +46,7 @@ QVariant DocumentModel::data(const QModelIndex &index, int role) const
         case ArchiveSerialNumberColumn:
             return document.archive_serial_number;
         case OwnerColumn:
-            return document.owner;
+            return client_->getUserName(document.owner);
         case IsSharedByRequesterColumn:
             return document.is_shared_by_requester;
         case NotesColumn:
@@ -76,7 +69,7 @@ QVariant DocumentModel::data(const QModelIndex &index, int role) const
 bool DocumentModel::setData(const QModelIndex &index, const QVariant &value, int role)
 {
     //reference
-    auto &doc = list_/*.results*/[index.row()];
+    auto &doc = list_[index.row()];
     auto docOld = doc;
 
     switch (index.column()) {
@@ -128,22 +121,6 @@ bool DocumentModel::setData(const QModelIndex &index, const QVariant &value, int
     return true;
 }
 
-void DocumentModel::setList(const QList<Document> &newList)
-{
-    beginResetModel();
-    list_ = newList;
-    inited_ = true;
-    endResetModel();
-}
-
-void DocumentModel::appendList(const QList<Document> &newList)
-{
-    beginResetModel();
-    list_ << newList;
-    inited_ = true;
-    endResetModel();
-}
-
 QList<int> DocumentModel::sectionList(const QStringList &display_fields)
 {
     auto fieldList = client_->fieldList();
@@ -153,42 +130,6 @@ QList<int> DocumentModel::sectionList(const QStringList &display_fields)
             list << i;
     }
     return list;
-}
-
-const Document &DocumentModel::documentAt(const QModelIndex &index)
-{
-    return documentAt(index.row());
-}
-
-const Document &DocumentModel::documentAt(int row)
-{
-    return list_.at(row);
-}
-
-QList<int> DocumentModel::documentsAt(QList<QModelIndex> rows)
-{
-    QList<int> list;
-    for(auto &&row : rows)
-        list << documentAt(row.row()).id;
-    return list;
-}
-
-// QList<const Document*> DocumentModel::documentsAt(QList<QModelIndex> rows)
-// {
-//     QList<const Document*> list;
-//     for(auto &&row : rows)
-//         list << &documentAt(row.row());
-//     return list;
-// }
-
-QList<Document> &DocumentModel::list()
-{
-    return list_;
-}
-
-Paperless *DocumentModel::client() const
-{
-    return client_;
 }
 
 QVariant DocumentModel::headerData(int section, Qt::Orientation orientation, int role) const

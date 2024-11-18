@@ -1,18 +1,24 @@
 #include "client.h"
 #include "accountmanager.h"
+#include "ui/mainwindows/correspondentwindow.h"
+#include "ui/mainwindows/customfieldwindow.h"
+#include "ui/mainwindows/documenttypewindow.h"
+#include "ui/mainwindows/storagepathwindow.h"
+#include "ui/mainwindows/tagwindow.h"
 #include "ui_client.h"
 
-#include "accountwindow.h"
+#include "ui/mainwindows/accountwindow.h"
 #include "config.h"
-#include "settingswindow.h"
-#include "logindialog.h"
-#include "viewwidget.h"
-#include "pageswitcher.h"
+#include "ui/mainwindows/settingswindow.h"
+#include "ui/dialogs/logindialog.h"
+#include "ui/mainwindows/documentwindow.h"
+#include "ui/pageswitcher.h"
 
 #include <QLabel>
 #include <QSplitter>
 #include <QVBoxLayout>
 #include <QWidgetAction>
+#include <xlsxdocument.h>
 
 Client::Client(QWidget *parent) :
     QMainWindow(parent),
@@ -67,6 +73,12 @@ QTreeView::item {
     if(Config::config()->ui_welcomePage.get())
         pageSwitcher_->addMainPage();
     pageSwitcher_->addDocumentsPage();
+
+    pageSwitcher_->addManagementWindow(new CorrespondentWindow(this, client_));
+    pageSwitcher_->addManagementWindow(new TagWindow(this, client_));
+    pageSwitcher_->addManagementWindow(new DocumentTypeWindow(this, client_));
+    pageSwitcher_->addManagementWindow(new StoragePathWindow(this, client_));
+    pageSwitcher_->addManagementWindow(new CustomFieldWindow(this, client_));
 
     pageSwitcher_->addSettingsWindow(new AccountWindow(this, client_));
     pageSwitcher_->addSettingsWindow(new SettingsWindow(this));
@@ -172,7 +184,7 @@ WindowsTitleBar *Client::titleBar() const
     return titleBar_;
 }
 
-void Client::closeEvent(QCloseEvent *event)
+void Client::closeEvent(QCloseEvent *event[[maybe_unused]])
 {
     emit closed();
 }
@@ -190,6 +202,8 @@ void Client::on_actionAccount_Manager_triggered()
 
 void Client::on_actionShow_Side_Bar_triggered(bool checked)
 {
+    Q_UNUSED(checked)
+    //TODO
     // splitter_.
 }
 

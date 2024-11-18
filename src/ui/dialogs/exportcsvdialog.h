@@ -35,9 +35,8 @@ private:
     SavedView view_;
     explicit ExportCSVDialog(QWidget *parent, Paperless *client, SavedView view);
 
-    QList<int> getSections();
-    void setupSections();
     void setupExportFields();
+    void setDisplayFields(const QStringList display_fields);
 };
 
 #endif // EXPORTCSVDIALOG_H

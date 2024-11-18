@@ -41,7 +41,14 @@ public:
 
     ~Reply()
     {
-        if(loop_) loop_->deleteLater();
+        if(!runBackground_){
+            if(isRunning())
+                stop();
+            if(reply_)
+                reply_->deleteLater();
+        }
+        if(loop_)
+            loop_->deleteLater();
     }
 
     std::shared_ptr<Reply<Result...>> asShared()
@@ -93,11 +100,12 @@ public:
         });
     };
 
+
 private:
     QEventLoop *loop_;
     QNetworkReply *reply_ = nullptr;
     std::function<std::tuple<Result...> (QNetworkReply *)> resultInterpreter_;
-    bool runBackground_ = false;
+    bool runBackground_ = true;
 };
 
 #endif // REPLY_HPP

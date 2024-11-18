@@ -13,41 +13,7 @@
   <property name="windowTitle">
    <string>MainWindow</string>
   </property>
-  <widget class="QWidget" name="centralwidget">
-   <layout class="QGridLayout" name="gridLayout">
-    <property name="leftMargin">
-     <number>0</number>
-    </property>
-    <property name="topMargin">
-     <number>0</number>
-    </property>
-    <property name="rightMargin">
-     <number>0</number>
-    </property>
-    <property name="bottomMargin">
-     <number>0</number>
-    </property>
-    <item row="0" column="0">
-     <widget class="QTreeView" name="treeView">
-      <property name="contextMenuPolicy">
-       <enum>Qt::ContextMenuPolicy::CustomContextMenu</enum>
-      </property>
-      <property name="editTriggers">
-       <set>QAbstractItemView::EditTrigger::NoEditTriggers</set>
-      </property>
-      <property name="alternatingRowColors">
-       <bool>true</bool>
-      </property>
-      <property name="selectionMode">
-       <enum>QAbstractItemView::SelectionMode::ExtendedSelection</enum>
-      </property>
-      <property name="rootIsDecorated">
-       <bool>false</bool>
-      </property>
-     </widget>
-    </item>
-   </layout>
-  </widget>
+  <widget class="QWidget" name="centralwidget"/>
   <widget class="QMenuBar" name="menubar">
    <property name="geometry">
     <rect>
@@ -86,22 +52,6 @@
    <addaction name="menuFile"/>
    <addaction name="menuSearch"/>
    <addaction name="menuView"/>
-  </widget>
-  <widget class="QToolBar" name="pageBar">
-   <property name="windowTitle">
-    <string>Page Bar</string>
-   </property>
-   <property name="toolButtonStyle">
-    <enum>Qt::ToolButtonStyle::ToolButtonTextBesideIcon</enum>
-   </property>
-   <attribute name="toolBarArea">
-    <enum>BottomToolBarArea</enum>
-   </attribute>
-   <attribute name="toolBarBreak">
-    <bool>false</bool>
-   </attribute>
-   <addaction name="actionPrevious_Page"/>
-   <addaction name="actionNext_Page"/>
   </widget>
   <widget class="QToolBar" name="searchBar">
    <property name="windowTitle">
@@ -235,7 +185,7 @@
     <bool>true</bool>
    </property>
    <property name="icon">
-    <iconset theme="QIcon::ThemeIcon::MailMarkRead"/>
+    <iconset theme="QIcon::ThemeIcon::MailMessageNew"/>
    </property>
    <property name="text">
     <string>Edit Mode</string>

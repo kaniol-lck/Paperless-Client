@@ -1,11 +1,11 @@
-#include "mainpagewindow.h"
-#include "pageswitcher.h"
+#include "ui/mainwindows/mainpagewindow.h"
+#include "ui/pageswitcher.h"
 #include "qmenubar.h"
 
 #include  <QMdiSubWindow>
 
 #include "paperless/paperless.h"
-#include "viewwidget.h"
+#include "ui/mainwindows/documentwindow.h"
 
 PageSwitcher::PageSwitcher(QWidget *parent, Paperless *client) :
     QMdiArea(parent),
@@ -13,6 +13,7 @@ PageSwitcher::PageSwitcher(QWidget *parent, Paperless *client) :
 {
     model_.appendRow(new QStandardItem(tr("Main")));
     model_.appendRow(new QStandardItem(tr("View")));
+    model_.appendRow(new QStandardItem(tr("Management")));
     model_.appendRow(new QStandardItem(tr("Settings")));
     for(int row = 0; row < model_.rowCount(); row++){
         auto item = model_.item(row);
@@ -42,24 +43,24 @@ void PageSwitcher::addDocumentsPage()
 {
     SavedView view;
     view.name = tr("Document");
-    addWindow(new ViewWidget(this, client_, view), Main);
+    addWindow(new DocumentWindow(this, client_, view), Main);
 }
 
-ViewWidget *PageSwitcher::viewWidget(int index) const
+DocumentWindow *PageSwitcher::viewWidget(int index) const
 {
-    return model_.item(View)->child(index)->data().value<ViewWidget *>();
+    return model_.item(View)->child(index)->data().value<DocumentWindow *>();
 }
 
-void PageSwitcher::addViewWidget(ViewWidget *viewWidget)
+void PageSwitcher::addViewWindow(DocumentWindow *viewWindow)
 {
     // browser->setPageSwitcher(this);
-    addWindow(viewWidget, View);
+    addWindow(viewWindow, View);
 }
 
-void PageSwitcher::removeViewWidget(int index)
+void PageSwitcher::removeViewWindow(int index)
 {
     auto item = model_.item(View)->takeRow(index).first();
-    item->data().value<ViewWidget *>()->deleteLater();
+    item->data().value<DocumentWindow *>()->deleteLater();
     removeSubWindowForItem(item);
 }
 
@@ -122,7 +123,7 @@ void PageSwitcher::syncViewList()
 {
     isSyncing_ = true;
     //remember selected path
-    ViewWidget *selectedViewWidget = nullptr;
+    DocumentWindow *selectedViewWidget = nullptr;
     auto [currentCategory, currentPage] = currentCategoryPage();
     if(currentCategory == View)
         selectedViewWidget = viewWidget(currentPage);
@@ -134,7 +135,7 @@ void PageSwitcher::syncViewList()
         if(!view.show_in_sidebar) continue;
         if(auto i = findViewWidget(view); i < 0){
             //not present, new one
-            addViewWidget(new ViewWidget(this, client_, view));
+            addViewWindow(new DocumentWindow(this, client_, view));
         } else{
             //present, move position
             oldCount--;
@@ -151,7 +152,7 @@ void PageSwitcher::syncViewList()
             if(!view.show_in_sidebar) continue;
             if(auto i = findViewWidget(view); i < 0){
                 //not present, new one
-                addViewWidget(new ViewWidget(this, client_, view));
+                addViewWindow(new DocumentWindow(this, client_, view));
             } else{
                 //present, move position
                 oldCount--;
@@ -166,7 +167,7 @@ void PageSwitcher::syncViewList()
     //remove remained mod path
     auto i = oldCount;
     while (i-- > 0) {
-        removeViewWidget(i);
+        removeViewWindow(i);
     }
 
     //they should be same after sync
@@ -184,7 +185,7 @@ void PageSwitcher::syncViewList()
     setPage(Main, 0);
 }
 
-void PageSwitcher::addWindow(ViewWidget *window, WindowCategory category)
+void PageSwitcher::addWindow(DocumentWindow *window, WindowCategory category)
 {
     //NOTE: wo do not need icon
     auto item = new QStandardItem(/*window->windowIcon(), */window->windowTitle());
@@ -230,8 +231,10 @@ int PageSwitcher::findViewWidget(SavedView view)
 {
     for(int row = 0; row < model_.item(View)->rowCount(); row++){
         auto item = model_.item(View)->child(row);
-        if(item->data().value<ViewWidget *>()->view().id == view.id)
+        if(item->data().value<DocumentWindow *>()->view().id == view.id)
             return row;
     }
     return -1;
 }
+
+

@@ -4,7 +4,7 @@
 #include <QMdiArea>
 #include <QStandardItemModel>
 
-#include "viewwidget.h"
+#include "ui/mainwindows/documentwindow.h"
 
 class Paperless;
 class PageSwitcher : public QMdiArea
@@ -13,7 +13,7 @@ class PageSwitcher : public QMdiArea
 
     static constexpr int SubWindowRole = 433;
 public:
-    enum WindowCategory{ Main, View, Settings };
+    enum WindowCategory{ Main, View, Management, Settings };
     explicit PageSwitcher(QWidget *parent, Paperless *client);
 
     void nextPage();
@@ -22,9 +22,14 @@ public:
     void addMainPage();
     void addDocumentsPage();
 
-    ViewWidget *viewWidget(int index) const;
-    void addViewWidget(ViewWidget *viewWidget);
-    void removeViewWidget(int index);
+    DocumentWindow *viewWidget(int index) const;
+    void addViewWindow(DocumentWindow *viewWindow);
+    void removeViewWindow(int index);
+
+    template<typename ModelT>
+    void addManagementWindow(AttrViewWindowBase<ModelT> *window){
+        addWindow(window, Management);
+    }
 
     void addSettingsWindow(QMainWindow *window);
 
@@ -45,7 +50,17 @@ public slots:
     void syncViewList();
 
 private:
-    void addWindow(ViewWidget *window, WindowCategory category);
+    template<typename ModelT>
+    void addWindow(AttrViewWindowBase<ModelT> *window, WindowCategory category)
+    {
+        //NOTE: wo do not need icon
+        auto item = new QStandardItem(/*window->windowIcon(), */window->windowTitle());
+        item->setData(QVariant::fromValue(window));
+        // item->setData(window->description(), Qt::UserRole + 2);
+        addSubWindowForItem(item);
+        model_.item(category)->appendRow(item);
+    }
+    void addWindow(DocumentWindow *window, WindowCategory category);
     void addWindow(QMainWindow *window, WindowCategory category);
     QMdiSubWindow *addSubWindowForItem(QStandardItem *item);
     void removeSubWindowForItem(QStandardItem *item);

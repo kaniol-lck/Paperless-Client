@@ -1,7 +1,7 @@
 #include "accountwindow.h"
 #include "accountmanager.h"
 #include "paperless/paperless.h"
-#include "ui/logindialog.h"
+#include "ui/dialogs/logindialog.h"
 #include "ui_accountwindow.h"
 
 #include <QStandardItemModel>

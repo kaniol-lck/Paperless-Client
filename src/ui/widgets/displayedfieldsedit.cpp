@@ -11,7 +11,8 @@ DisplayedFieldsEdit::DisplayedFieldsEdit(QWidget *parent)
     ui->displayedFields->setEditTriggers(QAbstractItemView::DoubleClicked |
                                          QAbstractItemView::EditKeyPressed |
                                          QAbstractItemView::AnyKeyPressed);
-    // connect(ui->exportFields->model(), &QAbstractItemModel::rowsMoved, this, &ExportCSVDialog::setupSections);
+    connect(ui->displayedFields->model(), &QAbstractItemModel::rowsMoved, this, &DisplayedFieldsEdit::changed);
+    connect(ui->displayedFields, &QListWidget::itemChanged, this, &DisplayedFieldsEdit::changed);
 }
 
 DisplayedFieldsEdit::~DisplayedFieldsEdit()

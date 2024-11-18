@@ -5,7 +5,7 @@
 #include <QStandardItemModel>
 #include <QtConcurrent/QtConcurrent>
 
-#include "documentmodel.h"
+#include "models/documentmodel.h"
 #include "util/CSVHelper.hpp"
 #include "paperless/paperless.h"
 

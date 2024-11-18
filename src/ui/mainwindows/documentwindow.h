@@ -1,7 +1,9 @@
-#ifndef VIEWWIDGET_H
-#define VIEWWIDGET_H
+#ifndef DOCUMENTWINDOW_H
+#define DOCUMENTWINDOW_H
 
+#include "attrviewwindow.h"
 #include "customsavedview.h"
+#include "models/documentmodel.h"
 #include "paperless/Document.h"
 #include "paperless/ReturnList.hpp"
 #include "paperless/SavedView.h"
@@ -13,19 +15,18 @@ class Paperless;
 namespace Ui {
 class ViewWidget;
 }
-class DocumentModel;
 class QComboBox;
 class QLineEdit;
 class FilterMenu;
 class QToolButton;
-class ViewWidget : public QMainWindow
+class DocumentWindow : public AttrViewWindowBase<DocumentModel>
 {
     Q_OBJECT
 
 public:
-    explicit ViewWidget(QWidget *parent/* = nullptr*/, Paperless *client, SavedView view = SavedView());
-    explicit ViewWidget(QWidget *parent/* = nullptr*/, Paperless *client, CustomSavedView view = CustomSavedView());
-    ~ViewWidget();
+    explicit DocumentWindow(QWidget *parent, Paperless *client, SavedView view = SavedView());
+    explicit DocumentWindow(QWidget *parent, Paperless *client, CustomSavedView view = CustomSavedView());
+    ~DocumentWindow();
 
     SavedView view() const;
     QString description() const;
@@ -33,16 +34,13 @@ public:
 public slots:
     void sync();
     void getDocs();
-    void search(int page = 1);
+    void search(int page = 1) override;
     void setDisplayFields(const QStringList display_fields);
-    void setList(const ReturnList<Document> &list);
 
 private slots:
-    void on_treeView_doubleClicked(const QModelIndex &index);
-    void on_actionPrevious_Page_triggered();
-    void on_actionNext_Page_triggered();
+    void onTreeViewDoubleClicked(const QModelIndex &index);
     void on_actionSearch_triggered();
-    void on_treeView_customContextMenuRequested(const QPoint &pos);
+    void onTreeViewCustomContextMenuRequested(const QPoint &pos);
     void on_actionPreview_triggered();
     void on_actionDownload_triggered();
     void onSelectedChanged();
@@ -65,30 +63,21 @@ private slots:
 
     void on_actionEdit_Document_triggered();
 
-protected:
-    void paintEvent(QPaintEvent *event) override;
-
 private:
     Ui::ViewWidget *ui;
     QComboBox *searchSelect_;
     QLineEdit *searchLine_;
-    QComboBox *pageSelect_;
-    Paperless *client_;
     SavedView original_view_;
-    SavedView view_;
-    DocumentModel *model_;
+    SavedView saved_view_;
     QList<FilterMenu*> filters_;
-    int currentPage_ = 1;
-    bool isNewSearch_ = true;
-    QList<int> selectedDocs_;
     QString description_;
-    QList<int> all_;
     QMenu *sortFieldMenu_;
 
     QToolButton *filter2button(FilterMenu *filter);
     Reply<ReturnList<Document>> searchReply(int page_size, int page = 1);
 
-    bool appendMode_;
+    void setupHelper();
+    void setupDisplayFields();
 };
 
-#endif // VIEWWIDGET_H
+#endif // DOCUMENTWINDOW_H

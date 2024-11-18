@@ -1,3 +1,6 @@
 [submodule "AppConfig"]
 	path = AppConfig
 	url = git@github.com:kaniol-lck/AppConfig.git
+[submodule "QXlsx"]
+	path = QXlsx
+	url = git@github.com:QtExcel/QXlsx.git

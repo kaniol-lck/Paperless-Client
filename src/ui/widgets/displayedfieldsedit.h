@@ -23,9 +23,11 @@ public:
 
     QStringList getDisplayFields();
 
+signals:
+    void changed();
+
 private slots:
     void on_moveUp_clicked();
-
     void on_moveDown_clicked();
 
 private:
