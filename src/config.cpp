@@ -8,6 +8,7 @@ Config::Config(QObject *parent)
     ui_sideBarLogo.setName(tr("Side bar logo path"));
     ui_welcomePageImagePath.setName(tr("Welcome page image path"));
     ui_showViewPagesOnly.setName(tr("Show view pages only"));
+    ui_showManagement.setName(tr("Show management tab"));
 
     view.setName(tr("Views"));
     view_docListDisplay.setName(tr("Document list display type"));

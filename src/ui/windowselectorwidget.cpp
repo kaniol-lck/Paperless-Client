@@ -53,6 +53,7 @@ WindowSelectorWidget::WindowSelectorWidget(QWidget *parent) :
         setPage(PageSwitcher::Settings, 1);
     });
 
+
     treeview_->setRootIsDecorated(false);
     treeview_->setHeaderHidden(true);
     treeview_->setEditTriggers(QAbstractItemView::NoEditTriggers);
@@ -74,13 +75,12 @@ QTreeView, QLabel {
 
 QTreeView::branch:selected {
   border-right: 3px solid #4ae;
+  background-color: #2c2c2c;
 }
 
 QTreeView::item:selected {
-  color: whitesmoke;
-  background-color: #444;
+  background-color: #272727;
 }
-
 )");
 }
 
@@ -90,6 +90,8 @@ void WindowSelectorWidget::setModel(QAbstractItemModel *model)
     treeview_->setModel(model);
     connect(Config::config()->ui_showViewPagesOnly.listener(), &ConfigListener::configChanged, this, &WindowSelectorWidget::setupRootIndex);
     setupRootIndex();
+    connect(Config::config()->ui_showManagement.listener(), &ConfigListener::configChanged, this, &WindowSelectorWidget::setupRows);
+    setupRows();
     connect(treeview_->selectionModel(), &QItemSelectionModel::currentRowChanged, this, &WindowSelectorWidget::onCurrentRowChanged);
 }
 
@@ -112,6 +114,12 @@ void WindowSelectorWidget::setupRootIndex()
     else
         treeview_->setRootIndex({});
     treeview_->expandAll();
+}
+
+void WindowSelectorWidget::setupRows()
+{
+    auto show = Config::config()->ui_showManagement.get();
+    treeview_->setRowHidden(PageSwitcher::Management, treeview_->rootIndex(), !show);
 }
 
 void WindowSelectorWidget::setPage(int category, int page)

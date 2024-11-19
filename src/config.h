@@ -18,6 +18,7 @@ public:
     ADD_CONFIG(QString, sideBarLogo, "logo.png", ui);
     ADD_CONFIG(QString, welcomePageImagePath, "background.jpg", ui);
     ADD_CONFIG(bool, showViewPagesOnly, true, ui);
+    ADD_CONFIG(bool, showManagement, true, ui);
 
     ADD_GROUP(view);
     ADD_CONFIG(int, docListDisplay, 0, view);
