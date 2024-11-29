@@ -3,6 +3,7 @@
 
 #include <QTreeView>
 
+class ViewHelper;
 class QToolButton;
 class ImageWidget;
 class QAbstractItemModel;
@@ -29,10 +30,10 @@ private:
     QTreeView *treeview_;
     QToolButton *accountsBtn_;
     QToolButton *settingsBtn_;
+    ViewHelper *helper_;
 
     void setPage(int category, int page);
 
-protected:
     void paintEvent(QPaintEvent *event) override;
 
     // QWidget interface

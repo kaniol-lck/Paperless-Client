@@ -5,9 +5,10 @@
 #include <QTime>
 #include <QTimer>
 
-ViewHelper::ViewHelper(QAbstractItemView *view) :
+ViewHelper::ViewHelper(QAbstractItemView *view, const QModelIndex &index) :
     QObject(view),
-    view_(view)
+    view_(view),
+    index_(index)
 {
     view->installEventFilter(this);
 }
@@ -19,10 +20,10 @@ bool ViewHelper::eventFilter(QObject *watched, QEvent *event)
     if(event->type() == QEvent::Type::Paint){
         QElapsedTimer timer;
         timer.start();
-        for(int row = 0; row < model->rowCount(); row++){
+        for(int row = 0; row < model->rowCount(index_); row++){
             for(auto &&[column, creator] : columnCreator_.asKeyValueRange()){
                 // qDebug() << column << "render";
-                auto index = model->index(row, column);
+                auto index = model->index(row, column, index_);
                 if(!enabled_){
                     view_->setIndexWidget(index, nullptr);
                     continue;
@@ -60,6 +61,11 @@ bool ViewHelper::enabled() const
 void ViewHelper::setEnabled(bool newEnabled)
 {
     enabled_ = newEnabled;
+}
+
+void ViewHelper::setIndex(const QModelIndex &newIndex)
+{
+    index_ = newIndex;
 }
 
 QModelIndexList ViewHelper::renderedIndexes()

@@ -10,6 +10,8 @@ class TagWindow : public AttrViewWindow<TagModel>
 public:
     TagWindow(QWidget *parent, Paperless *client);
 
+private slots:
+    void onTreeViewDoubleClicked(const QModelIndex &index);
 };
 
 #endif // TAGWINDOW_H

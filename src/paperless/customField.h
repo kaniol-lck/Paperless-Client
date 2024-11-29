@@ -26,10 +26,19 @@ struct CustomField
         return customField;
     }
 
+    QJsonObject toJson() const{
+        QJsonObject object;
+        put_attr(object, id);
+        put_attr(object, name);
+        put_attr(object, data_type);
+        return object;
+    }
+
     int id;
     QString name;
     QString data_type;
     QJsonObject extra_data;
 };
+
 
 #endif // CUSTOMFIELD_H

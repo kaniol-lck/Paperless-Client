@@ -8,7 +8,7 @@ class ViewHelper : public QObject
 {
     Q_OBJECT
 public:
-    ViewHelper(QAbstractItemView *view);
+    ViewHelper(QAbstractItemView *view, const QModelIndex &index = {});
 
     bool eventFilter(QObject *watched, QEvent *event) override;
 
@@ -18,10 +18,13 @@ public:
     bool enabled() const;
     void setEnabled(bool newEnabled);
 
+    void setIndex(const QModelIndex &newIndex);
+
 private:
-    bool enabled_;
+    bool enabled_ = true;
 
     QAbstractItemView *view_;
+    QModelIndex index_;
     QMap<int, std::function<QWidget *(const QModelIndex &index, QAbstractItemModel *model)> > columnCreator_;
 
     QModelIndexList renderedIndexes();

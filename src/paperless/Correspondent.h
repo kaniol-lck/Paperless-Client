@@ -26,6 +26,17 @@ struct Correspondent
         return correspondent;
     }
 
+    QJsonObject toJson() const{
+        QJsonObject object;
+        put_attr(object, id);
+        put_attr(object, name);
+        put_attr(object, match);
+        put_attr(object, matching_algorithm);
+        put_attr(object, is_insensitive);
+        put_attr(object, owner);
+        return object;
+    }
+
     int id;
     QString slug;
     QString name;

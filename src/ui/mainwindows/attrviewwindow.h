@@ -25,6 +25,7 @@ public:
         pageSelect_(new QComboBox(this))
     {
         initUi();
+        helper_->setEnabled(false);
         appendMode_ = Config::config()->view_docListDisplay.get() == 0;
 
         treeview_->setModel(model_);
@@ -36,7 +37,7 @@ public:
         });
 
         if(appendMode_){
-            pageBar->hide();
+            // pageBar->hide();
             // ui->pageBar->setEnabled(false);
             connect(treeview_->verticalScrollBar(), &QScrollBar::valueChanged, this, [this]{
                 if(treeview_->verticalScrollBar()->value() >= treeview_->verticalScrollBar()->maximum() * 0.9){

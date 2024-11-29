@@ -39,8 +39,8 @@ public slots:
 
 private slots:
     void onTreeViewDoubleClicked(const QModelIndex &index);
-    void on_actionSearch_triggered();
     void onTreeViewCustomContextMenuRequested(const QPoint &pos);
+    void on_actionSearch_triggered();
     void on_actionPreview_triggered();
     void on_actionDownload_triggered();
     void onSelectedChanged();

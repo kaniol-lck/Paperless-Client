@@ -10,6 +10,8 @@ class CorrespondentWindow : public AttrViewWindow<CorrespondentModel>
 public:
     CorrespondentWindow(QWidget *parent, Paperless *client);
 
+private slots:
+    void onTreeViewDoubleClicked(const QModelIndex &index);
 };
 
 #endif // CORRESPONDENTWINDOW_H
