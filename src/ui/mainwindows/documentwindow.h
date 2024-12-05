@@ -50,8 +50,6 @@ private slots:
     void on_actionEdit_Mode_toggled(bool arg1);
     void setupToolBar();
 
-    // void on_tableView_clicked(const QModelIndex &index);
-
     void on_actionUpload_triggered();
 
     void on_actionExport_CSV_for_All_triggered();
@@ -78,6 +76,8 @@ private:
 
     void setupHelper();
     void setupDisplayFields();
+    void editDocument(const QModelIndex &index);
+
 };
 
 #endif // DOCUMENTWINDOW_H

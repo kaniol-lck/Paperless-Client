@@ -150,6 +150,15 @@ Reply<ReturnList<Document> > DocumentWindow::searchReply(int page_size, int page
 
 void DocumentWindow::setupHelper()
 {
+    helper_->setEnabled(DocumentModel::TagsColumn, true);
+    helper_->addCreator(DocumentModel::TagsColumn, [this](const auto &index, auto)
+                        -> QWidget*{
+        Document doc = model_->at(index);
+        auto widget = new TagsWidget(this);
+        widget->setClient(client_);
+        widget->setTags(doc.tags);
+        return widget;
+    });
     helper_->addCreator(DocumentModel::CorrespondentColumn, [this](const auto &index, auto)
                         -> QWidget*{
         auto doc = model_->at(index);
@@ -274,9 +283,14 @@ void DocumentWindow::setDisplayFields(const QStringList display_fields)
 void DocumentWindow::onTreeViewDoubleClicked(const QModelIndex &index)
 {
     if(ui->actionEdit_Mode->isChecked()) return;
-    auto document = model_->at(index);
-    auto url = client_->api()->documentPreviewUrl(document);
-    QDesktopServices::openUrl(url);
+    if(auto behavier = Config::config()->view_doubleClickBehavier.get();
+        behavier == Config::OpenUrl){
+        auto document = model_->at(index);
+        auto url = client_->api()->documentPreviewUrl(document);
+        QDesktopServices::openUrl(url);
+    } else if(behavier == Config::EditProperties){
+        editDocument(index);
+    }
 }
 
 void DocumentWindow::on_actionSearch_triggered()
@@ -295,6 +309,7 @@ QToolButton *DocumentWindow::filter2button(FilterMenu *filter)
 
 void DocumentWindow::onTreeViewCustomContextMenuRequested(const QPoint &pos)
 {
+    qDebug() << selectedIds_;
     if(selectedIds_.isEmpty()) return;
     auto menu = new QMenu(this);
 
@@ -310,6 +325,7 @@ void DocumentWindow::onTreeViewCustomContextMenuRequested(const QPoint &pos)
     else
         menu->addAction(ui->actionBulk_Download);
 
+    // Edit related
     if(!client_->currentUser().is_staff) return;
     menu->addSeparator();
 
@@ -396,7 +412,10 @@ void DocumentWindow::on_actionImport_CSV_triggered()
 
 void DocumentWindow::on_actionEdit_Mode_toggled(bool arg1)
 {
-    helper_->setEnabled(arg1);
+    for(auto c : { DocumentModel::CorrespondentColumn,
+                   DocumentModel::DocumentTypeColumn,
+                   DocumentModel::StoragePathColumn })
+        helper_->setEnabled(c, arg1);
     if(arg1){
         treeview_->setEditTriggers(QAbstractItemView::DoubleClicked |
                                       QAbstractItemView::EditKeyPressed |
@@ -496,23 +515,26 @@ void DocumentWindow::onTreeViewHeaderCustomContextMenuRequested(const QPoint &po
     menu->exec(treeview_->mapToGlobal(pos));
 }
 
+void DocumentWindow::editDocument(const QModelIndex &index)
+{
+    auto edit = new DocumentEdit(this);
+    edit->setClient(client_);
+    auto docOld = model_->at(index);
+    edit->setDocument(docOld);
+    auto dialog = makeDialog(edit, tr("Edit Document"));
+    dialog->show();
+    connect(dialog, &QDialog::accepted, this, [edit, this, docOld]{
+        auto document = edit->getDocument();
+        client_->api()->putDocument(document.id, document, docOld)
+            .setOnFinished(this, [this](auto){
+            sync();
+        });
+    });
+}
 
 void DocumentWindow::on_actionEdit_Document_triggered()
 {
     if(selectedIds_.isEmpty()) return;
-    if(selectedIds_.size() == 1){
-        auto edit = new DocumentEdit(this);
-        edit->setClient(client_);
-        auto docOld = model_->at(treeview_->selectionModel()->selectedRows().first().row());
-        edit->setDocument(docOld);
-        auto dialog = makeDialog(edit, tr("Edit Document"));
-        dialog->show();
-        connect(dialog, &QDialog::accepted, this, [edit, this, docOld]{
-            auto document = edit->getDocument();
-            client_->api()->putDocument(document.id, document, docOld)
-                .setOnFinished(this, [this](auto){
-                sync();
-            });
-        });
-    }
+    if(selectedIds_.size() == 1)
+        editDocument(treeview_->selectionModel()->selectedRows().first());
 }

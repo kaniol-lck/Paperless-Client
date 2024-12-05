@@ -26,6 +26,8 @@ public:
 
     ServerMap<QList<Account> > accountMap() const;
 
+    bool hasCurrentAccount();
+
 signals:
     void currentAccountUpdated();
     void accountListUpdated();

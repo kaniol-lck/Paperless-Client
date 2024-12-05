@@ -13,6 +13,7 @@ Config::Config(QObject *parent)
     view.setName(tr("Views"));
     view_docListDisplay.setName(tr("Document list display type"));
     view_docCountPerPage.setName(tr("Document numbers per page"));
+    view_doubleClickBehavier.setName(tr("Double Click Behavier"));
 
     view_toolBar.setName(tr("Tool Bar"));
     view_toolBar_showSearchBar.setName(tr("Show Search Bar"));
@@ -32,6 +33,11 @@ Config::Config(QObject *parent)
         QSpinBox *spinBox = qobject_cast<QSpinBox*>(widget);
         spinBox->setMinimum(1);
         spinBox->setMaximum(999);
+    });
+    view_doubleClickBehavier.setGenerator<ComboBoxWrapper>(QStringList{
+        tr("Do Nothing"),
+        tr("Open Url"),
+        tr("Edit Properties"),
     });
 }
 

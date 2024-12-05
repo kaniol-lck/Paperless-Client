@@ -19,6 +19,7 @@ void DocumentEdit::setDocument(const Document &document)
 {
     document_ = document;
     ui->title->setText(document.title);
+    ui->tagswidget->setTags(document.tags);
     ui->correspondentSelect->setCurrentText(client_->getCorrespondentName(document.correspondent));
     ui->documentTypeSelect->setCurrentText(client_->getDocumentTypeName(document.document_type));
     ui->storagePathSelect->setCurrentText(client_->getStoragePathName(document.storage_path));
@@ -57,6 +58,7 @@ void DocumentEdit::updatePathList()
 void DocumentEdit::setClient(Paperless *newClient)
 {
     client_ = newClient;
+    ui->tagswidget->setClient(client_);
     connect(client_, &Paperless::correspondentListUpdated, this, &DocumentEdit::updateCorrespondentList);
     connect(client_, &Paperless::document_typeListUpdated, this, &DocumentEdit::updateDocTypeList);
     connect(client_, &Paperless::storage_pathListUpdated, this, &DocumentEdit::updatePathList);

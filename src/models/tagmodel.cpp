@@ -1,8 +1,5 @@
 #include "tagmodel.h"
 
-#include <QGuiApplication>
-#include <QFont>
-
 #include "paperless/paperless.h"
 
 TagModel::TagModel(QObject *parent, Paperless *client) :
@@ -57,13 +54,6 @@ QVariant TagModel::headerData(int section, Qt::Orientation orientation, int role
         return QVariant();
 
     switch (role) {
-    case Qt::FontRole:{
-        auto font = qApp->font();
-        font.setStyleStrategy(QFont::PreferAntialias);
-        font.setBold(true);
-        font.setLetterSpacing(QFont::AbsoluteSpacing, 1.5);
-        return font;
-    }
     case Qt::ToolTipRole:
     case Qt::DisplayRole:
         switch (section) {

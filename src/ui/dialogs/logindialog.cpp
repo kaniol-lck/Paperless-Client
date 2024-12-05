@@ -29,15 +29,16 @@ void LoginDialog::setServer(const QString &server)
 void LoginDialog::on_buttonBox_accepted()
 {
     ui->progressBar->show();
-    auto server = ui->server->text();
+    QUrl server = ui->server->text();
     auto username = ui->username->text();
     auto password = ui->password->text();
+
     auto reply = client_->api()->login(server,
                                        username,
                                        password);
-    reply.setOnFinished(this, [=](QString token){
+    reply.setOnFinished(this, [=, this](QString token){
         if(!token.isEmpty()){
-            AccountManager::manager()->addAccount(server, username, token);
+            AccountManager::manager()->addAccount(server.toString(), username, token);
             accept();
         } else {
             ui->progressBar->hide();

@@ -1,8 +1,5 @@
 #include "customfieldmodel.h"
 
-#include <QGuiApplication>
-#include <QFont>
-
 #include "paperless/paperless.h"
 
 CustomFieldModel::CustomFieldModel(QObject *parent, Paperless *client) :
@@ -47,13 +44,6 @@ QVariant CustomFieldModel::headerData(int section, Qt::Orientation orientation, 
         return QVariant();
 
     switch (role) {
-    case Qt::FontRole:{
-        auto font = qApp->font();
-        font.setStyleStrategy(QFont::PreferAntialias);
-        font.setBold(true);
-        font.setLetterSpacing(QFont::AbsoluteSpacing, 1.5);
-        return font;
-    }
     case Qt::ToolTipRole:
     case Qt::DisplayRole:
         switch (section) {

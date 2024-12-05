@@ -15,17 +15,16 @@ public:
     void addCreator(int column, const std::function<QWidget *(const QModelIndex &, QAbstractItemModel *)> &newCreator);
     void removeCreator(int column);
 
-    bool enabled() const;
-    void setEnabled(bool newEnabled);
+    void setEnabled(int column, bool enabled);
 
     void setIndex(const QModelIndex &newIndex);
 
 private:
-    bool enabled_ = true;
 
     QAbstractItemView *view_;
     QModelIndex index_;
     QMap<int, std::function<QWidget *(const QModelIndex &index, QAbstractItemModel *model)> > columnCreator_;
+    QMap<int, bool> enabled_;
 
     QModelIndexList renderedIndexes();
 };

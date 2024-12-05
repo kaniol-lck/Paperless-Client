@@ -24,6 +24,10 @@ void MatchFieldWidget::setConfig(MatchFieldConfig *config)
 
 MatchFieldConfig::MatchFieldConfig(QObject *parent, std::shared_ptr<JsonSetting> settings) :
     AppConfig(parent, settings){
+    id.setGenerator<SpinBoxWrapper>()->setAttrSetter([](auto *widget){
+        QSpinBox *spinBox = qobject_cast<QSpinBox*>(widget);
+        spinBox->setEnabled(false);
+    });
     matching_algorithm.setGenerator<ComboBoxWrapper>(QStringList{
         tr("None: Disable matching"),
         tr("Any: Document contains any of these words (space separated)"),

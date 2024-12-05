@@ -1,21 +1,31 @@
 #include "ui/client.h"
 
 #include <QApplication>
+#include <QPainter>
 #include <QTranslator>
 
 #include "util/framelesswrapper.h"
 
 int main(int argc, char *argv[])
 {
+    QApplication::setAttribute(Qt::AA_UseHighDpiPixmaps);
     QApplication a(argc, argv);
     a.setOrganizationName("kaniol");
     a.setApplicationName("Paperless Client");
     a.setApplicationDisplayName(QObject::tr("Paperless Client"));
 
-    auto font = a.font();
-    font.setFamily("Microsoft Yahei");
-    font.setPointSize(12);
-    a.setFont(font);
+    qApp->setStyleSheet(R"(
+* {
+  font-size: 12pt;
+  font-family: "Microsoft Yahei";
+}
+
+QHeaderView {
+  font-weight: bold;
+  letter-spacing: 2px;
+}
+
+)");
 
     //setup translator
     QTranslator translator;

@@ -25,11 +25,10 @@ public:
         pageSelect_(new QComboBox(this))
     {
         initUi();
-        helper_->setEnabled(false);
         appendMode_ = Config::config()->view_docListDisplay.get() == 0;
 
         treeview_->setModel(model_);
-
+        treeview_->setContextMenuPolicy(Qt::CustomContextMenu);
         treeview_->setAlternatingRowColors(true);
         treeview_->header()->setMinimumHeight(48);
         connect(treeview_->selectionModel(), &QItemSelectionModel::selectionChanged, this, [this]{

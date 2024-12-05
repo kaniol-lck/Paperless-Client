@@ -77,6 +77,11 @@ ServerMap<QList<Account> > AccountManager::accountMap() const
     return accountMap_;
 }
 
+bool AccountManager::hasCurrentAccount()
+{
+    return currentAccount_.id != 0;
+}
+
 Account AccountManager::currentAccount() const
 {
     return currentAccount_;

@@ -26,7 +26,7 @@ struct Account
         return object;
     }
 
-    int id;
+    int id = 0;
     QString server;
     QString username;
     QString token;

@@ -24,7 +24,7 @@ bool ViewHelper::eventFilter(QObject *watched, QEvent *event)
             for(auto &&[column, creator] : columnCreator_.asKeyValueRange()){
                 // qDebug() << column << "render";
                 auto index = model->index(row, column, index_);
-                if(!enabled_){
+                if(!enabled_.value(column, false)){
                     view_->setIndexWidget(index, nullptr);
                     continue;
                 }
@@ -53,14 +53,9 @@ void ViewHelper::removeCreator(int column)
     columnCreator_.remove(column);
 }
 
-bool ViewHelper::enabled() const
+void ViewHelper::setEnabled(int column, bool enabled)
 {
-    return enabled_;
-}
-
-void ViewHelper::setEnabled(bool newEnabled)
-{
-    enabled_ = newEnabled;
+    enabled_[column] = enabled;
 }
 
 void ViewHelper::setIndex(const QModelIndex &newIndex)

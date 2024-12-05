@@ -78,20 +78,28 @@
      <item row="0" column="1">
       <widget class="QLineEdit" name="title"/>
      </item>
+     <item row="1" column="1">
+      <widget class="TagsWidget" name="tagswidget" native="true"/>
+     </item>
      <item row="1" column="0">
       <widget class="QLabel" name="label_6">
        <property name="text">
-        <string>TextLabel</string>
+        <string>Tag:</string>
        </property>
       </widget>
-     </item>
-     <item row="1" column="1">
-      <widget class="QWidget" name="tagswidget" native="true"/>
      </item>
     </layout>
    </item>
   </layout>
  </widget>
+ <customwidgets>
+  <customwidget>
+   <class>TagsWidget</class>
+   <extends>QWidget</extends>
+   <header>ui/widgets/tagswidget.h</header>
+   <container>1</container>
+  </customwidget>
+ </customwidgets>
  <resources/>
  <connections/>
 </ui>

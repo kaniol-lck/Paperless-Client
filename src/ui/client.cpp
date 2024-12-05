@@ -104,8 +104,8 @@ Client::~Client()
 
 void Client::on_actionLogin_triggered()
 {
-    auto dialog = new LoginDialog(client_, this);
-    dialog->show();
+    auto dialog = new LoginDialog(client_, nullptr);
+    dialog->exec();
     connect(dialog, &QDialog::accepted, this, [this]{
         client_->updateAll();
     });
@@ -161,6 +161,9 @@ void Client::updateViewList()
 
 void Client::updateCurrentAccount()
 {
+    // pop up login dialog when no account activated
+    if(!AccountManager::manager()->hasCurrentAccount())
+        on_actionLogin_triggered();
     ui->actionAccount->setText(tr("Current Account: %1").arg(AccountManager::manager()->currentAccount().username));
 }
 

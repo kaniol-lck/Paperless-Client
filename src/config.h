@@ -21,8 +21,11 @@ public:
     ADD_CONFIG(bool, showManagement, true, ui);
 
     ADD_GROUP(view);
-    ADD_CONFIG(int, docListDisplay, 0, view);
+    enum DocListDisplay { Unified, Pagination };
+    ADD_CONFIG(int, docListDisplay, Unified, view);
     ADD_CONFIG(int, docCountPerPage, 25, view);
+    enum DoubleClickBehavier { DoNothing, OpenUrl, EditProperties };
+    ADD_CONFIG(int, doubleClickBehavier, OpenUrl, view);
 
     ADD_GROUP(toolBar, view);
     ADD_CONFIG(bool, showSearchBar, false, view_toolBar);

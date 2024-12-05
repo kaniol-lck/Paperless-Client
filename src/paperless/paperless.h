@@ -25,6 +25,11 @@ private: QList<Type> name##List_;
 void name##List##Updated();
 
 #define ID2NAME(Type, n) \
+Type get##Type(int id) const{ \
+    for(auto &&v : n##List_) \
+        if(v.id == id) return v; \
+    return {}; \
+} \
 QString get##Type##Name(int id) const{ \
     for(auto &&v : n##List_) \
     if(v.id == id) return v.name; \
