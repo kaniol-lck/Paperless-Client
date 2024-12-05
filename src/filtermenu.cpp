@@ -55,6 +55,10 @@ QList<FilterMenu*> FilterMenu::filtersFromView(const SavedView &view, Paperless 
 void FilterMenu::updateList()
 {
     clear();
+    connect(addAction(tr("Reset Filter"), this, &FilterMenu::reset), &QAction::triggered,
+            this, &FilterMenu::filterChanged);
+    addSeparator();
+
     for(auto &&[i, str] : itemList_.asKeyValueRange()){
         auto id = QString::number(i);
         auto action = addAction(str);
@@ -100,4 +104,11 @@ QString FilterMenu::rule() const
 QStringList FilterMenu::checkedIds() const
 {
     return checkedIds_;
+}
+
+void FilterMenu::reset()
+{
+    checkedIds_.clear();
+    for(auto action : actions())
+        action->setChecked(false);
 }

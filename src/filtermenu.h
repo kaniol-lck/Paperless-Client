@@ -44,6 +44,8 @@ public:
     QString rule() const;
     QStringList checkedIds() const;
 
+    void reset();
+
 signals:
     void filterChanged();
 

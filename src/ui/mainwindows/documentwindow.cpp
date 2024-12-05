@@ -62,6 +62,13 @@ DocumentWindow::DocumentWindow(QWidget *parent, Paperless *client, SavedView vie
 
     // filter bar
     filters_ = FilterMenu::filtersFromView(saved_view_, client_, this);
+    auto action = ui->menuSearch->addAction(tr("Reset All Filters"), this, [this]{
+        for(auto filter : filters_)
+            filter->reset();
+        search();
+    });
+    ui->filterBar->addAction(action);
+    ui->menuSearch->addSeparator();
     for(auto menu : filters_){
         ui->menuSearch->addAction(menu->menuAction());
         ui->filterBar->addWidget(filter2button(menu));
