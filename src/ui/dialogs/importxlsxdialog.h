@@ -1,5 +1,5 @@
-#ifndef IMPORTCSVDIALOG_H
-#define IMPORTCSVDIALOG_H
+#ifndef IMPORTXLSXDIALOG_H
+#define IMPORTXLSXDIALOG_H
 
 #include "paperless/Document.h"
 #include <QDialog>
@@ -8,16 +8,16 @@ class DocumentModel;
 
 class Paperless;
 namespace Ui {
-class ImportCSVDialog;
+class ImportXlsxDialog;
 }
 class QStandardItemModel;
-class ImportCSVDialog : public QDialog
+class ImportXlsxDialog : public QDialog
 {
     Q_OBJECT
 
 public:
-    explicit ImportCSVDialog(DocumentModel *model, QWidget *parent, Paperless *client, const QString &fileName);
-    ~ImportCSVDialog();
+    explicit ImportXlsxDialog(DocumentModel *model, QWidget *parent, Paperless *client, const QString &fileName);
+    ~ImportXlsxDialog();
 
     bool fileValid() const;
 
@@ -25,7 +25,7 @@ private slots:
     void on_buttonBox_accepted();
 
 private:
-    Ui::ImportCSVDialog *ui;
+    Ui::ImportXlsxDialog *ui;
     Paperless *client_;
     DocumentModel *docModel_;
     QList<Document> docList_;
@@ -33,7 +33,7 @@ private:
     QStandardItemModel *model_;
     bool fileValid_ = false;
 
-    void loadCSV(const QString &fileName);
+    void loadXlsx(const QString &fileName);
 };
 
-#endif // IMPORTCSVDIALOG_H
+#endif // IMPORTXLSXDIALOG_H

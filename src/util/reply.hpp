@@ -10,11 +10,9 @@ class Reply
 {
 public:
     Reply(QNetworkReply *reply, std::function<std::tuple<Result...> (QNetworkReply *)> resultInterpreter = {}) :
-        loop_(new QEventLoop),
         reply_(reply),
         resultInterpreter_(resultInterpreter)
     {
-        QObject::connect(reply_, &QNetworkReply::finished, loop_, &QEventLoop::quit);
     }
 
     Reply(Reply &&other) :
@@ -41,7 +39,12 @@ public:
 
     ~Reply()
     {
-        if(!runBackground_){
+        if(runBackground_){
+            // if runBackground enabled, reply will delete itself so we do not need handle
+            if(!resultInterpreter_)
+                reply_->deleteLater();
+        }else {
+            // if runBackground not enabled, stop running and delete in deconstuctor
             if(isRunning())
                 stop();
             if(reply_)
@@ -73,12 +76,17 @@ public:
 
     void waitForFinished()
     {
+        loop_ = new QEventLoop;
+        QObject::connect(reply_, &QNetworkReply::finished, loop_, &QEventLoop::quit);
         loop_->exec();
     }
 
     void stop()
     {
-        if(reply_) reply_->abort();
+        if(reply_)
+            reply_->abort();
+        if(runBackground_)
+            reply_->deleteLater();
     }
 
     void setInterpreter(std::function<std::tuple<Result...> (QNetworkReply *)> func){
@@ -87,7 +95,8 @@ public:
 
     template<typename Func1>
     void setOnFinished(QObject *object, Func1 callback, std::function<void(QNetworkReply::NetworkError)> errorHandler = {}){
-        //copy-capture to prevent this deconstructed
+        // copy-capture to prevent this deconstructed
+        // when detached(runBackground)
         QObject::connect(reply_, &QNetworkReply::finished, object, [=, this, reply = reply_, resultInterpreter = resultInterpreter_, runBackground = runBackground_]{
             if(reply->error() != QNetworkReply::NoError) {
                 qDebug() << reply->errorString();
@@ -100,9 +109,8 @@ public:
         });
     };
 
-
 private:
-    QEventLoop *loop_;
+    QEventLoop *loop_ = nullptr;
     QNetworkReply *reply_ = nullptr;
     std::function<std::tuple<Result...> (QNetworkReply *)> resultInterpreter_;
     bool runBackground_ = true;

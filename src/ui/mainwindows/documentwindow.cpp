@@ -1,8 +1,9 @@
 #include "documentwindow.h"
 #include "ui/dialogs/bulkdownloaddialog.h"
 #include "config.h"
+#include "ui/dialogs/exportxlsxdialog.h"
 #include "ui/documentedit.h"
-#include "ui/dialogs/importcsvdialog.h"
+#include "ui/dialogs/importxlsxdialog.h"
 #include "ui/widgets/tagswidget.h"
 #include "ui_documentwindow.h"
 
@@ -18,7 +19,6 @@
 #include "paperless/paperless.h"
 #include "paperless/paperlessapi.h"
 #include "filtermenu.h"
-#include "ui/dialogs/exportcsvdialog.h"
 #include "accountmanager.h"
 #include "ui/dialogs/documentuploaddialog.h"
 #include "ui/documentitemdelegate.h"
@@ -399,21 +399,21 @@ void DocumentWindow::on_actionExport_CSV_triggered()
     for(auto index : treeview_->selectionModel()->selectedRows()){
         docList << model_->at(index);
     }
-    auto dialog = new ExportCSVDialog(this, client_, saved_view_, docList);
+    auto dialog = new ExportXlsxDialog(this, client_, saved_view_, docList);
     dialog->show();
 }
 
 void DocumentWindow::on_actionExport_CSV_for_All_triggered()
 {
-    auto dialog = new ExportCSVDialog(this, client_, saved_view_, searchReply(10000));
+    auto dialog = new ExportXlsxDialog(this, client_, saved_view_, searchReply(10000));
     dialog->show();
 }
 
 void DocumentWindow::on_actionImport_CSV_triggered()
 {
-    auto fileName = QFileDialog::getOpenFileName(this, tr("Select CSV file"), "", "*.csv");
+    auto fileName = QFileDialog::getOpenFileName(this, tr("Select CSV file"), "", "Excel Files (*.xlsx);;CSV Files (*.csv)");
     if(fileName.isEmpty()) return;
-    auto dialog = new ImportCSVDialog(model_, this, client_, fileName);
+    auto dialog = new ImportXlsxDialog(model_, this, client_, fileName);
     dialog->show();
 }
 
@@ -480,7 +480,6 @@ void DocumentWindow::on_actionAuto_Fill_triggered()
         }
     }
 }
-
 
 void DocumentWindow::on_actionDisplayed_Field_triggered()
 {

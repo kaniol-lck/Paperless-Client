@@ -1,17 +1,18 @@
-#include "importcsvdialog.h"
-#include "ui_importcsvdialog.h"
+#include "importxlsxdialog.h"
+#include "ui_importxlsxdialog.h"
 
 #include <QFile>
 #include <QStandardItemModel>
 #include <QtConcurrent/QtConcurrent>
+#include <QXlsx/QXlsx/header/xlsxdocument.h>
 
 #include "models/documentmodel.h"
-#include "util/CSVHelper.hpp"
 #include "paperless/paperless.h"
 
-ImportCSVDialog::ImportCSVDialog(DocumentModel *model, QWidget *parent, Paperless *client, const QString &fileName):
+
+ImportXlsxDialog::ImportXlsxDialog(DocumentModel *model, QWidget *parent, Paperless *client, const QString &fileName):
     QDialog(parent),
-    ui(new Ui::ImportCSVDialog),
+    ui(new Ui::ImportXlsxDialog),
     client_(client),
     docModel_(model),
     model_(new QStandardItemModel)
@@ -19,7 +20,7 @@ ImportCSVDialog::ImportCSVDialog(DocumentModel *model, QWidget *parent, Paperles
     ui->setupUi(this);
 
     ui->buttonBox->setEnabled(false);
-    auto future = QtConcurrent::run(&ImportCSVDialog::loadCSV, this, fileName);
+    auto future = QtConcurrent::run(&ImportXlsxDialog::loadXlsx, this, fileName);
     auto watcher = new QFutureWatcher<void>(this);
     watcher->setFuture(future);
     connect(watcher, &QFutureWatcher<void>::finished, this, [this]{
@@ -32,17 +33,17 @@ ImportCSVDialog::ImportCSVDialog(DocumentModel *model, QWidget *parent, Paperles
     });
 }
 
-ImportCSVDialog::~ImportCSVDialog()
+ImportXlsxDialog::~ImportXlsxDialog()
 {
     delete ui;
 }
 
-bool ImportCSVDialog::fileValid() const
+bool ImportXlsxDialog::fileValid() const
 {
     return fileValid_;
 }
 
-void ImportCSVDialog::on_buttonBox_accepted()
+void ImportXlsxDialog::on_buttonBox_accepted()
 {
     auto count = new int(0);
     for(auto &&doc : docList_){
@@ -79,14 +80,38 @@ void ImportCSVDialog::on_buttonBox_accepted()
     // }
 }
 
-void ImportCSVDialog::loadCSV(const QString &fileName)
+void ImportXlsxDialog::loadXlsx(const QString &fileName)
 {
-    auto &&[headerLine, list] = fromCSVV(fileName, 0, 2);
+    QXlsx::Document xlsx(fileName);
+    if(!xlsx.load()){
+        return ;
+    }
+    auto workSheet = xlsx.currentWorksheet();
+
+    int rowTotal = workSheet->dimension().rowCount();
+    int colTotal = workSheet->dimension().columnCount();
+    if(rowTotal < 3)
+        return;
+
+    auto getRow = [=](int row){
+        QStringList list;
+        for(int col = 1; col < colTotal; col++){
+            if(auto cell = workSheet->cellAt(row, col))
+                list << cell->value().toString();
+            else
+                list << "";
+        }
+        return list;
+    };
+
+    auto headerLine = getRow(1);
     auto header = docModel_->headerOf(headerLine);
-    for(auto &&i : list){
-        docList_ << docModel_->docOf(header, i);
-        docJsonList_ << docModel_->docJsonOf(header, i);
-        // qDebug() << docModel_->docJsonOf(header, i);
+
+    for(int row = 3; row < rowTotal; row++){
+        auto line = getRow(row);
+        docList_ << docModel_->docOf(header, line);
+        docJsonList_ << docModel_->docJsonOf(header, line);
+        // qDebug() << docModel_->docJsonOf(header, line);
     }
 }
 
